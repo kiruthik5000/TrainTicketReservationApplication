@@ -4,9 +4,11 @@ import utils.InputHandler;
 
 public class MainMenuUi {
     private final UserUi userUi;
+    private final BookingUi bookingUi;
 
-    public MainMenuUi(UserUi userUi) {
+    public MainMenuUi(UserUi userUi, BookingUi bookingUi) {
         this.userUi = userUi;
+        this.bookingUi = bookingUi;
     }
 
     public void start() throws Exception {
@@ -27,8 +29,8 @@ public class MainMenuUi {
                 case 2:
                     register();
                     break;
-                case 5:
-                    showBookings();
+                case 3:
+                    bookTickets();
                     break;
                 case 6:
                     System.out.println("Thank You!");
@@ -56,7 +58,11 @@ public class MainMenuUi {
         }
     }
 
-    private void showBookings() {
-
+    private void bookTickets() {
+        try {
+            bookingUi.bookTickets();
+        } catch (Exception e) {
+            System.out.println("Error Occurred in booking "+e.getMessage());
+        }
     }
 }

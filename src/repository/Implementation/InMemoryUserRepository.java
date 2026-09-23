@@ -28,9 +28,9 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public boolean save(User user) {
+    public User save(User user) {
         user.setUserId(++nextUserId);
         userMap.put(nextUserId, user);
-        return true;
+        return user;
     }
 }

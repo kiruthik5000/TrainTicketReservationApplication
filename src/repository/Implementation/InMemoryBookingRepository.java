@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryBookingRepository implements BookingRepository {
-
     private Map<String, Booking> bookingMap;
 
     public InMemoryBookingRepository() {
@@ -23,5 +22,16 @@ public class InMemoryBookingRepository implements BookingRepository {
                 .stream()
                 .filter(k -> k.getUserId() == userId)
                 .toList();
+    }
+
+    @Override
+    public Booking addBooking(Booking booking) {
+        bookingMap.put(booking.getBookingId(), booking);
+        return booking;
+    }
+
+    @Override
+    public boolean isMatchPnr(String pnr) {
+        return bookingMap.containsKey(pnr);
     }
 }

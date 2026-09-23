@@ -2,10 +2,12 @@ package service;
 
 import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
+import exception.SeatNotFoundException;
+import exception.UnAuthorizedAccessException;
 import model.*;
 import repository.*;
+import utils.SessionStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -40,9 +42,10 @@ public class BookingService {
 
     public BookingResponseDto bookTickets(int trainId, String from, String to, List<PassengerRequestDto> passengers) {
         String pnr = generatePNR();
-         List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId);
-         List<Passenger> cnfPassengers = new ArrayList<>();
-         for (int i=0; i<availableSeats.size(); i++) {
+        User currentUser = SessionStorage.getCurrentUser();
+        if (currentUser == null) throw new UnAuthorizedAccessException("User must login to book tickets");
+        List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId);
+        for (int i=0; i<availableSeats.size(); i++) {
              PassengerRequestDto curPassenger = passengers.get(i);
              Seat curSeat = availableSeats.get(i);
              seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
@@ -50,26 +53,54 @@ public class BookingService {
              passengerRepository.addPassenger(cnfPassenger);
          }
          if (availableSeats.size() < passengers.size()) {
-             updateWaitingQueue(availableSeats.size(), passengers);
+             updateWaitingQueue(availableSeats.size(), passengers, trainId, pnr);
          }
+         Booking currentBooking = new Booking(pnr, from, to, trainId, currentUser.getUserId());
+         bookingRepository.addBooking(currentBooking);
          return new BookingResponseDto(pnr, from, to, trainRepository.getTrainById(trainId), passengers.size());
     }
 
-    private void updateWaitingQueue(int )
-
-    public static String generatePNR() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(4);
-        Random rand = new Random();
-        for (int i=0; i<9; i++) {
-            int nextChar;
-            if (i < 4) {
-                nextChar = rand.nextInt(5, 10);
+    private void updateWaitingQueue(int index, List<PassengerRequestDto> passengers, int trainId, String pnr) {
+        int racAvail = waitingListRepository.getAvailableRac(trainId);
+        int wlAvail = waitingListRepository.getAvailableWl(trainId);
+        int waitingAvailable = racAvail + wlAvail;
+        if (passengers.size() - index > waitingAvailable) throw new SeatNotFoundException("No seats available for booking");
+        for (int i = index; i < Math.min(passengers.size(), waitingAvailable); i++) {
+            PassengerRequestDto curPassengerReq = passengers.get(i);
+            Passenger curPassenger;
+            if (racAvail > 0) {
+                curPassenger = new Passenger(0, curPassengerReq.getName(), curPassengerReq.getAge(), PassengerStatus.RAC, pnr,-1);
+                curPassenger = passengerRepository.addPassenger(curPassenger);
+                waitingListRepository.addRac(trainId, curPassenger.getPassengerId());
+                racAvail--;
+            } else if(wlAvail > 0) {
+                curPassenger = new Passenger(0, curPassengerReq.getName(), curPassengerReq.getAge(), PassengerStatus.WL, pnr, -1);
+                curPassenger = passengerRepository.addPassenger(curPassenger);
+                waitingListRepository.addWl(trainId, curPassenger.getPassengerId());
+                wlAvail--;
             } else {
-                nextChar = rand.nextInt(0, 10);
+                throw new SeatNotFoundException("Seats are full");
             }
-            sb.append(nextChar);
+
         }
-        return sb.toString();
+    }
+
+    private String generatePNR() {
+        while (true) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(4);
+            Random rand = new Random();
+            for (int i = 0; i < 9; i++) {
+                int nextChar;
+                if (i < 4) {
+                    nextChar = rand.nextInt(5, 10);
+                } else {
+                    nextChar = rand.nextInt(0, 10);
+                }
+                sb.append(nextChar);
+            }
+            String currentPNR = sb.toString();
+            if (!bookingRepository.isMatchPnr(currentPNR)) return currentPNR;
+        }
     }
 }

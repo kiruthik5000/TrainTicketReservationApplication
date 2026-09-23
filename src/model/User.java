@@ -27,4 +27,6 @@ public class User {
     public String getUsername() {
         return this.username;
     }
+
+    public int getUserId() {return this.userId;}
 }

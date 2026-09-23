@@ -23,10 +23,11 @@ public class UserService {
                 dto.getUsername(),
                 dto.getEmail(),
                 dto.getPassword());
-        return userRepository.save(newUser);
+        return userRepository.save(newUser) != null;
     }
 
     public boolean login(String email, String password) {
+        if (SessionStorage.getCurrentUser() != null) throw new InvalidInputException("User Already loggedIn");
         User user = userRepository.getUserByEmail(email);
         if (user == null) throw new UserNotFoundException("User not found for this email");
         if (!user.getPassword().equals(password)) throw new IncorrectPasswordException("password Incorrect");

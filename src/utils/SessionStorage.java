@@ -20,4 +20,8 @@ public class SessionStorage {
         currentUser = null;
         return true;
     }
+
+    public static User getCurrentUser() {
+        return currentUser;
+    }
 }

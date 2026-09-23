@@ -21,6 +21,6 @@ public class BookingResponseDto {
     public String toString() {
         return "pnr: " + pnr + "\n"+ from + " -- "+to + "\n" +
                 "train: " + train +
-                "noOfPassengers=" + noOfPassengers;
+                "\nNumber Of Passengers : " + noOfPassengers;
     }
 }

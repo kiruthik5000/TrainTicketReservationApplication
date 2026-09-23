@@ -17,7 +17,7 @@ public class InMemoryPassengerRepository implements PassengerRepository {
         passengerMap.put(1, new Passenger(1, "admin", 25, PassengerStatus.CNF, "123456789", 1));
     }
 
-    public List<Passenger> getPassengerByBooking(int bookingId) {
+    public List<Passenger> getPassengerByBooking(String bookingId) {
         return passengerMap
                 .values()
                 .stream()
@@ -26,8 +26,9 @@ public class InMemoryPassengerRepository implements PassengerRepository {
     }
 
     @Override
-    public void addPassenger(Passenger passenger) {
+    public Passenger addPassenger(Passenger passenger) {
         passenger.setPassengerId(++nextPassengerId);
         passengerMap.put(nextPassengerId, passenger);
+        return passenger;
     }
 }
