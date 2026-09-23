@@ -31,6 +31,6 @@ public class InMemoryUserRepository implements UserRepository {
     public boolean save(User user) {
         user.setUserId(++nextUserId);
         userMap.put(nextUserId, user);
-        return false;
+        return true;
     }
 }

@@ -18,6 +18,7 @@ public class UserService {
     }
 
     public boolean saveUser(UserRequestDto dto) {
+        if (!validateEmail(dto.getEmail()) || !validatePassword(dto.getPassword())) return false;
         User newUser = new User(0,
                 dto.getUsername(),
                 dto.getEmail(),
@@ -42,7 +43,6 @@ public class UserService {
 
     private boolean validatePassword(String password) {
         if (password.length() < 6) throw new InvalidInputException("Password Must be 6 letters long");
-        if (!password.matches("^[0-9]+[@;,]")) throw new InvalidInputException("Password  Must contains numbers or symbols");
         return true;
     }
 }

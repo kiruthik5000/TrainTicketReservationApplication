@@ -11,7 +11,7 @@ public class InputHandler {
     public static int getNumericValue(String label) throws Exception {
 
         while (true) {
-            System.out.println(label+":");
+            System.out.println("Enter your "+label+":");
             try {
                 int value =  Integer.parseInt(s.nextLine());
                 if (value < 0) throw new InvalidInputException("Enter positive value");
@@ -26,7 +26,7 @@ public class InputHandler {
 
     public static String getStringValue(String lable) throws Exception {
         while (true) {
-            System.out.println(lable+":");
+            System.out.println("Enter your "+lable+":");
             try {
                 String value = s.nextLine().trim();
                 if (value.isEmpty()) throw new InvalidInputException("Enter Non empty String value");
