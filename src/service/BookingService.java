@@ -2,12 +2,14 @@ package service;
 
 import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
+import dto.PassengerResponseDto;
 import exception.SeatNotFoundException;
 import exception.UnAuthorizedAccessException;
 import model.*;
 import repository.*;
 import utils.SessionStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -49,7 +51,7 @@ public class BookingService {
              PassengerRequestDto curPassenger = passengers.get(i);
              Seat curSeat = availableSeats.get(i);
              seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
-             Passenger cnfPassenger = new Passenger(0, curPassenger.getName(), curPassenger.getAge(), PassengerStatus.CNF, pnr, curSeat.getSeatId());
+             Passenger cnfPassenger = new Passenger(0, curPassenger.getName(), curPassenger.getAge(), PassengerStatus.CNF, -1, pnr, curSeat.getSeatId());
              passengerRepository.addPassenger(cnfPassenger);
          }
          if (availableSeats.size() < passengers.size()) {
@@ -57,7 +59,8 @@ public class BookingService {
          }
          Booking currentBooking = new Booking(pnr, from, to, trainId, currentUser.getUserId());
          bookingRepository.addBooking(currentBooking);
-         return new BookingResponseDto(pnr, from, to, trainRepository.getTrainById(trainId), passengers.size());
+         List<PassengerResponseDto> addedPassengers = gatherPassengerDetails(pnr);
+         return new BookingResponseDto(pnr, from, to, trainRepository.getTrainById(trainId), passengers.size(), addedPassengers);
     }
 
     private void updateWaitingQueue(int index, List<PassengerRequestDto> passengers, int trainId, String pnr) {
@@ -69,12 +72,12 @@ public class BookingService {
             PassengerRequestDto curPassengerReq = passengers.get(i);
             Passenger curPassenger;
             if (racAvail > 0) {
-                curPassenger = new Passenger(0, curPassengerReq.getName(), curPassengerReq.getAge(), PassengerStatus.RAC, pnr,-1);
+                curPassenger = new Passenger(0, curPassengerReq.getName(), curPassengerReq.getAge(), PassengerStatus.RAC, racAvail, pnr,-1);
                 curPassenger = passengerRepository.addPassenger(curPassenger);
                 waitingListRepository.addRac(trainId, curPassenger.getPassengerId());
                 racAvail--;
             } else if(wlAvail > 0) {
-                curPassenger = new Passenger(0, curPassengerReq.getName(), curPassengerReq.getAge(), PassengerStatus.WL, pnr, -1);
+                curPassenger = new Passenger(0, curPassengerReq.getName(), curPassengerReq.getAge(), PassengerStatus.WL, wlAvail, pnr, -1);
                 curPassenger = passengerRepository.addPassenger(curPassenger);
                 waitingListRepository.addWl(trainId, curPassenger.getPassengerId());
                 wlAvail--;
@@ -84,7 +87,22 @@ public class BookingService {
 
         }
     }
-
+    private List<PassengerResponseDto> gatherPassengerDetails(String pnr) {
+        List<Passenger> passengers = passengerRepository.getPassengerByBooking(pnr);
+        List<PassengerResponseDto> passengerResponseDtos = new ArrayList<>();
+        for (Passenger p : passengers) {
+            int seatNo;
+            if (p.getSeatId() != -1){
+                seatNo = seatRepository.getSeatById(p.getSeatId()).getSeatNo();
+            } else {
+                seatNo = p.getSequenceNo();
+            }
+            passengerResponseDtos.add(
+                    new PassengerResponseDto(p.getName(), p.getAge(), p.getStatus(), seatNo)
+            );
+        }
+        return passengerResponseDtos;
+    }
     private String generatePNR() {
         while (true) {
             StringBuilder sb = new StringBuilder();

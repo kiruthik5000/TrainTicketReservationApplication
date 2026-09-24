@@ -35,8 +35,9 @@ public class BookingUi {
             }
         }
         Train selectedTrain = trainList.get(choice - 1);
-        System.out.println("Seats: ");
-        System.out.println(bookingService.getAvailableSeats(selectedTrain.getTrainId()));
+        System.out.println("------------------------");
+        System.out.println(selectedTrain);
+        System.out.println("Seats: "+bookingService.getAvailableSeats(selectedTrain.getTrainId()));
         System.out.println("1. Select passengers");
         while (true) {
             try {
@@ -55,7 +56,8 @@ public class BookingUi {
 
     private List<PassengerRequestDto> gatherPassengers() throws Exception {
         List<PassengerRequestDto> passengerList = new ArrayList<>();
-        while (true) {
+        int i = 6;
+        while (i -- > 0) {
             System.out.println("1. Add new passenger");
             System.out.println("2. return");
 

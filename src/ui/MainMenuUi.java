@@ -1,6 +1,7 @@
 package ui;
 
 import utils.InputHandler;
+import utils.SessionStorage;
 
 public class MainMenuUi {
     private final UserUi userUi;
@@ -13,8 +14,11 @@ public class MainMenuUi {
 
     public void start() throws Exception {
         while (true) {
-            System.out.println("1. Login");
-            System.out.println("2. Register");
+            System.out.println("---- Welcome To Train Ticket Reservation System ----\n");
+            if (SessionStorage.getCurrentUser() == null) {
+                System.out.println("1. Login");
+                System.out.println("2. Register");
+            }
             System.out.println("3. Book Tickets");
             System.out.println("4. Cancel Tickets");
             System.out.println("5. Show Bookings");

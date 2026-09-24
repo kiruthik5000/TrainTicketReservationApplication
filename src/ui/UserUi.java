@@ -18,7 +18,6 @@ public class UserUi {
         String password = InputHandler.getStringValue("password");
         if (userService.login(email, password)) {
             System.out.println("Successfully LoggedIn!");
-            System.out.println("---- Welcome "+ SessionStorage.getUserName()+" ----");
         }
     }
 

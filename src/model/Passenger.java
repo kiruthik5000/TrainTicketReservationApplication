@@ -5,15 +5,17 @@ public class Passenger {
     private String name;
     private int age;
     private PassengerStatus status;
+    private int sequenceNo;
     private String bookingId;
     private int seatId;
 
-    public Passenger(int passengerId, String name, int age, PassengerStatus status, String bookingId, int seatId) {
+    public Passenger(int passengerId, String name, int age, PassengerStatus status, int sequenceNo, String bookingId, int seatId) {
         this.passengerId = passengerId;
         this.name = name;
         this.age = age;
         this.status = status;
         this.bookingId = bookingId;
+        this.sequenceNo = sequenceNo;
         this.seatId = seatId;
     }
 
@@ -32,6 +34,8 @@ public class Passenger {
     public int getAge() {
         return age;
     }
+
+    public int getSequenceNo(){return sequenceNo;}
 
     public PassengerStatus getStatus() {
         return status;
