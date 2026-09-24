@@ -30,4 +30,7 @@ public class UserUi {
             System.out.println("Successfully Registered!");
         }
     }
-}
+    public void logout() throws Exception {
+        userService.logout();
+    }
+ }

@@ -8,31 +8,31 @@ public class InputHandler {
 
     private static final Scanner s = new Scanner(System.in);
 
-    public static int getNumericValue(String label) throws Exception {
+    public static int getNumericValue(String label, int limit) {
 
         while (true) {
             System.out.println("Enter your "+label+":");
             try {
                 int value =  Integer.parseInt(s.nextLine());
-                if (value < 0) throw new InvalidInputException("Enter positive value");
+                if (value < 0 || value > limit) throw new InvalidInputException("Enter positive value");
                 return value;
             } catch (NumberFormatException e) {
-                throw new NumberFormatException("Enter numeric input");
+                System.out.println("Enter numeric Input"+e.getMessage());
             } catch (Exception e) {
-                throw new Exception("Unexpected Error Occurred"+e.getMessage());
+                System.out.println("Unexpected Error Occurred"+e.getMessage());
             }
         }
     }
 
-    public static String getStringValue(String lable) throws Exception {
+    public static String getStringValue(String label) {
         while (true) {
-            System.out.println("Enter your "+lable+":");
+            System.out.println("Enter your "+ label +":");
             try {
                 String value = s.nextLine().trim();
                 if (value.isEmpty()) throw new InvalidInputException("Enter Non empty String value");
                 return value;
             } catch (Exception e) {
-                throw new Exception("Unexpected Error Occurred"+e.getMessage());
+                System.out.println("Unexpected Error Occurred"+e.getMessage());
             }
         }
     }

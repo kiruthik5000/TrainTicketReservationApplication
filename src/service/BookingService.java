@@ -5,6 +5,7 @@ import dto.PassengerRequestDto;
 import dto.PassengerResponseDto;
 import exception.SeatNotFoundException;
 import exception.UnAuthorizedAccessException;
+import exception.UserNotFoundException;
 import model.*;
 import repository.*;
 import utils.SessionStorage;
@@ -47,7 +48,7 @@ public class BookingService {
         User currentUser = SessionStorage.getCurrentUser();
         if (currentUser == null) throw new UnAuthorizedAccessException("User must login to book tickets");
         List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId);
-        for (int i=0; i<availableSeats.size(); i++) {
+        for (int i=0; i<Math.min(availableSeats.size(), passengers.size()); i++) {
              PassengerRequestDto curPassenger = passengers.get(i);
              Seat curSeat = availableSeats.get(i);
              seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
@@ -61,6 +62,19 @@ public class BookingService {
          bookingRepository.addBooking(currentBooking);
          List<PassengerResponseDto> addedPassengers = gatherPassengerDetails(pnr);
          return new BookingResponseDto(pnr, from, to, trainRepository.getTrainById(trainId), passengers.size(), addedPassengers);
+    }
+
+    public List<Booking> getAllBookings() {
+        User currentUser = SessionStorage.getCurrentUser();
+        if (currentUser == null) throw new UserNotFoundException("User must login to view their bookings");
+        return bookingRepository.getBookingByUser(currentUser.getUserId());
+    }
+
+    public BookingResponseDto getBookingDetails(String pnr) {
+        Booking curBooking = bookingRepository.getBookingById(pnr);
+        Train curTrain = trainRepository.getTrainById(curBooking.getTrainId());
+        List<PassengerResponseDto> curPassengers = gatherPassengerDetails(pnr);
+        return new BookingResponseDto(pnr, curBooking.getFrom(), curBooking.getTo(), curTrain, curPassengers.size(), curPassengers);
     }
 
     private void updateWaitingQueue(int index, List<PassengerRequestDto> passengers, int trainId, String pnr) {

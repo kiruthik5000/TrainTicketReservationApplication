@@ -23,7 +23,6 @@ public class BookingResponseDto {
 
     @Override
     public String toString() {
-//
         StringBuilder sb = new StringBuilder();
         sb.append("pnr: " + pnr + "\n"+ from + " -- "+to + "\ntrain: " + train + "\nNumber Of Passengers : " + noOfPassengers);
         for (int i=0; i<passengerResponseDtoList.size(); i++) {

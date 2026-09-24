@@ -34,4 +34,7 @@ public class InMemoryBookingRepository implements BookingRepository {
     public boolean isMatchPnr(String pnr) {
         return bookingMap.containsKey(pnr);
     }
+
+    @Override
+    public Booking getBookingById(String pnr){return bookingMap.getOrDefault(pnr, null);}
 }

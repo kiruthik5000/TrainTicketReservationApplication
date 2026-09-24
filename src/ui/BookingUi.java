@@ -2,11 +2,12 @@ package ui;
 
 import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
-import exception.InvalidInputException;
+import model.Booking;
 import model.Train;
 import service.BookingService;
 import utils.InputHandler;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,34 +25,26 @@ public class BookingUi {
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1)+". "+trainList.get(i));
         }
-        int choice;
-        while (true) {
-            try {
-                choice = InputHandler.getNumericValue("Train Index");
-                if (choice <= 0 || choice > trainList.size()) throw new InvalidInputException("Invalid choice");
-                break;
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
+        int choice = InputHandler.getNumericValue("Train Index", trainList.size());
         Train selectedTrain = trainList.get(choice - 1);
         System.out.println("------------------------");
         System.out.println(selectedTrain);
         System.out.println("Seats: "+bookingService.getAvailableSeats(selectedTrain.getTrainId()));
-        System.out.println("1. Select passengers");
-        while (true) {
-            try {
-                choice = InputHandler.getNumericValue("Choice");
-                if (choice != 1) throw new InvalidInputException("Invalid Choice");
-                break;
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
         List<PassengerRequestDto> passengersList = gatherPassengers();
         System.out.println("Selected "+passengersList.size()+" of Passengers");
         BookingResponseDto responseDto = bookingService.bookTickets(selectedTrain.getTrainId(), from, to, passengersList);
         System.out.println(responseDto);
+    }
+
+    public void showBookings() throws Exception {
+        List<Booking> bookings = bookingService.getAllBookings();
+        for (int i=0; i<bookings.size(); i++) {
+            Booking curBooking = bookings.get(i);
+            System.out.println((i + 1)+". pnr: "+curBooking.getBookingId()+"\t"+curBooking.getFrom()+" - "+curBooking.getTo()+"\t"+LocalDate.now());
+        }
+        int choice = InputHandler.getNumericValue("Booking Index", bookings.size());
+        BookingResponseDto selectedBooking = bookingService.getBookingDetails(bookings.get(choice - 1).getBookingId());
+        System.out.println(selectedBooking);
     }
 
     private List<PassengerRequestDto> gatherPassengers() throws Exception {
@@ -61,13 +54,15 @@ public class BookingUi {
             System.out.println("1. Add new passenger");
             System.out.println("2. return");
 
-            int choice = InputHandler.getNumericValue("choice");
+            int choice = InputHandler.getNumericValue("choice", 2);
             if (choice == 1) {
                 String name = InputHandler.getStringValue("name");
-                int age = InputHandler.getNumericValue("age");
+                int age = InputHandler.getNumericValue("age", 100);
                 passengerList.add(new PassengerRequestDto(name, age));
             } else break;
         }
         return passengerList;
     }
+
+
 }

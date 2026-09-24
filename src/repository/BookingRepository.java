@@ -8,4 +8,5 @@ public interface BookingRepository {
     List<Booking> getBookingByUser(int userId);
     Booking addBooking(Booking booking);
     boolean isMatchPnr(String pnr);
+    Booking getBookingById(String pnr);
 }

@@ -46,4 +46,8 @@ public class UserService {
         if (password.length() < 6) throw new InvalidInputException("Password Must be 6 letters long");
         return true;
     }
+
+    public void logout() {
+        SessionStorage.removeUser();
+    }
 }

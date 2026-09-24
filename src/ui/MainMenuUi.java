@@ -22,9 +22,13 @@ public class MainMenuUi {
             System.out.println("3. Book Tickets");
             System.out.println("4. Cancel Tickets");
             System.out.println("5. Show Bookings");
-            System.out.println("6. Exit");
+            if (SessionStorage.getCurrentUser() != null) {
+                System.out.println("6. Logout");
+            } else {
+                System.out.println("6. Exit");
+            }
 
-            int choice = InputHandler.getNumericValue("choice");
+            int choice = InputHandler.getNumericValue("choice", 6);
 
             switch (choice) {
                 case 1:
@@ -36,8 +40,11 @@ public class MainMenuUi {
                 case 3:
                     bookTickets();
                     break;
+                case 5:
+                    showBookings();
+                    break;
                 case 6:
-                    System.out.println("Thank You!");
+                    if (exit()) break;
                     return;
                 default:
                     System.out.println("Invalid Option Entered");
@@ -67,6 +74,29 @@ public class MainMenuUi {
             bookingUi.bookTickets();
         } catch (Exception e) {
             System.out.println("Error Occurred in booking "+e.getMessage());
+        }
+    }
+
+    private boolean exit() {
+        try {
+            if (SessionStorage.getCurrentUser() != null) {
+                userUi.logout();
+                return true;
+            } else {
+                System.out.println("Thank You !");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("Error Occurred in Logout "+e.getMessage());
+        }
+        return true;
+    }
+
+    private void showBookings() {
+        try {
+            bookingUi.showBookings();
+        } catch (Exception e) {
+            System.out.println("Error Occurred in Showing Booking "+e.getMessage());
         }
     }
 }
