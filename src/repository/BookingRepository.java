@@ -1,6 +1,7 @@
 package repository;
 
 import model.Booking;
+import model.BookingStatus;
 
 import java.util.List;
 
@@ -9,4 +10,5 @@ public interface BookingRepository {
     Booking addBooking(Booking booking);
     boolean isMatchPnr(String pnr);
     Booking getBookingById(String pnr);
+    void updateStatus(String pnr, BookingStatus status);
 }

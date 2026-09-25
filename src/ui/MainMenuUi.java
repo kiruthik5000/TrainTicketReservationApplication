@@ -6,10 +6,11 @@ import utils.SessionStorage;
 public class MainMenuUi {
     private final UserUi userUi;
     private final BookingUi bookingUi;
-
-    public MainMenuUi(UserUi userUi, BookingUi bookingUi) {
+    private final CancellationUi cancellationUi;
+    public MainMenuUi(UserUi userUi, BookingUi bookingUi, CancellationUi cancellationUi) {
         this.userUi = userUi;
         this.bookingUi = bookingUi;
+        this.cancellationUi = cancellationUi;
     }
 
     public void start() throws Exception {
@@ -40,6 +41,9 @@ public class MainMenuUi {
                 case 3:
                     bookTickets();
                     break;
+                case 4:
+                    cancelTickets();
+                    break;
                 case 5:
                     showBookings();
                     break;
@@ -57,7 +61,7 @@ public class MainMenuUi {
         try {
             userUi.login();
         } catch (Exception e) {
-            System.out.println("Error Occurred in login "+e.getMessage());
+            System.out.println("Error Occurred in login "+e.getClass().getSimpleName()+e.getMessage());
         }
     }
 
@@ -65,7 +69,7 @@ public class MainMenuUi {
         try {
             userUi.register();
         } catch (Exception e) {
-            System.out.println("Error Occurred in register "+e.getMessage());
+            System.out.println("Error Occurred in register "+e.getClass().getSimpleName()+e.getMessage());
         }
     }
 
@@ -73,7 +77,15 @@ public class MainMenuUi {
         try {
             bookingUi.bookTickets();
         } catch (Exception e) {
-            System.out.println("Error Occurred in booking "+e.getMessage());
+            System.out.println("Error Occurred in booking "+e.getClass().getSimpleName()+e.getMessage());
+        }
+    }
+
+    private void cancelTickets() {
+        try {
+            cancellationUi.cancelTickets();
+        } catch (Exception e) {
+            System.out.println("Error Occurred in cancellation "+e.getClass().getSimpleName()+e.getMessage());
         }
     }
 
@@ -87,7 +99,7 @@ public class MainMenuUi {
                 return false;
             }
         } catch (Exception e) {
-            System.out.println("Error Occurred in Logout "+e.getMessage());
+            System.out.println("Error Occurred in Logout "+e.getClass().getSimpleName()+e.getMessage());
         }
         return true;
     }
@@ -96,7 +108,7 @@ public class MainMenuUi {
         try {
             bookingUi.showBookings();
         } catch (Exception e) {
-            System.out.println("Error Occurred in Showing Booking "+e.getMessage());
+            System.out.println("Error Occurred in Showing Booking "+e.getClass().getSimpleName()+e.getMessage());
         }
     }
 }

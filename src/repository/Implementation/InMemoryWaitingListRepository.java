@@ -21,7 +21,7 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
 
 
     @Override
-    public int getRACNo(int trainId) {
+    public int getRACAvailabilityNo(int trainId) {
         int curSize = racList
                 .get(trainId)
                 .size();
@@ -30,7 +30,7 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
     }
 
     @Override
-    public int getWLNo(int trainId) {
+    public int getWLNAvailability(int trainId) {
         int curSize = wlList
                 .get(trainId)
                 .size();
@@ -58,5 +58,53 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
     @Override
     public int getAvailableWl(int trainId) {
         return wlLimit - wlList.get(trainId).size();
+    }
+
+    @Override
+    public void removeRacPassenger(int pId, int trainId) {
+        if (racList.containsKey(trainId)) {
+            racList.get(trainId).remove(pId);
+        }
+    }
+
+    @Override
+    public void removeWlPassenger(int pId, int trainId) {
+        if (wlList.containsKey(trainId)) {
+            wlList.get(trainId).remove(pId);
+        }
+    }
+
+    @Override
+    public int getFirstRacPassenger(int trainId) {
+        if (racList.containsKey(trainId) && !racList.get(trainId).isEmpty()) {
+            return racList.get(trainId).pollFirst();
+        }
+        return -1;
+    }
+
+    @Override
+    public int getFirstWlPassenger(int trainId) {
+        if (wlList.containsKey(trainId) && !wlList.get(trainId).isEmpty()) {
+            return wlList.get(trainId).pollFirst();
+        }
+        return -1;
+    }
+
+    @Override
+    public int getRacNo(int trainId, int pId) {
+        LinkedList<Integer> curList = racList.get(trainId);
+        for (int i=0; i<curList.size(); i++) {
+            if (curList.get(i) == pId) return i + 1;
+        }
+        return -1;
+    }
+
+    @Override
+    public int getWlNo(int trainId, int pId) {
+        LinkedList<Integer> curList = wlList.get(trainId);
+        for (int i=0; i<curList.size(); i++) {
+            if (curList.get(i) == pId) return i + 1;
+        }
+        return -1;
     }
 }

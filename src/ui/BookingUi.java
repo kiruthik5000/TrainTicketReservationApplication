@@ -2,6 +2,7 @@ package ui;
 
 import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
+import exception.InvalidInputException;
 import model.Booking;
 import model.Train;
 import service.BookingService;
@@ -61,6 +62,7 @@ public class BookingUi {
                 passengerList.add(new PassengerRequestDto(name, age));
             } else break;
         }
+        if (passengerList.isEmpty()) throw new InvalidInputException("No Passenger Added");
         return passengerList;
     }
 

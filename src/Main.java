@@ -1,8 +1,10 @@
 import repository.*;
 import repository.Implementation.*;
 import service.BookingService;
+import service.CancellationService;
 import service.UserService;
 import ui.BookingUi;
+import ui.CancellationUi;
 import ui.MainMenuUi;
 import ui.UserUi;
 
@@ -20,11 +22,13 @@ public class Main {
 
         UserService userService = new UserService(userRepository);
         BookingService bookingService = new BookingService(trainRepository, seatRepository, bookingRepository, passengerRepository, waitingListRepository);
+        CancellationService cancellationService = new CancellationService(bookingRepository, seatRepository, waitingListRepository, passengerRepository);
 
         UserUi userUi = new UserUi(userService);
         BookingUi bookingUi = new BookingUi(bookingService);
+        CancellationUi cancellationUi = new CancellationUi(cancellationService, bookingService);
 
-        MainMenuUi mainMenuUI = new MainMenuUi(userUi, bookingUi);
+        MainMenuUi mainMenuUI = new MainMenuUi(userUi, bookingUi, cancellationUi);
         mainMenuUI.start();
     }
 }

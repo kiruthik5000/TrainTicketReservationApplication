@@ -10,11 +10,11 @@ import java.util.Map;
 
 public class InMemoryPassengerRepository implements PassengerRepository {
     private int nextPassengerId = 1;
-    private Map<Integer, Passenger> passengerMap;
+    private final Map<Integer, Passenger> passengerMap;
 
     public InMemoryPassengerRepository() {
         passengerMap = new HashMap<>();
-        passengerMap.put(1, new Passenger(1, "admin", 25, PassengerStatus.CNF, -1,"123456789", 1));
+        passengerMap.put(1, new Passenger(1, "admin", 25, PassengerStatus.CNF,"123456789", 1));
     }
 
     public List<Passenger> getPassengerByBooking(String bookingId) {
@@ -30,5 +30,13 @@ public class InMemoryPassengerRepository implements PassengerRepository {
         passenger.setPassengerId(++nextPassengerId);
         passengerMap.put(nextPassengerId, passenger);
         return passenger;
+    }
+    @Override
+    public void updatePassengerStatusAndSeatNo(int id, PassengerStatus status, int seatId) {
+        if (passengerMap.containsKey(id)) {
+            Passenger curPassenger = passengerMap.get(id);
+            curPassenger.setStatus(status);
+            curPassenger.setSeatId(seatId);
+        }
     }
 }

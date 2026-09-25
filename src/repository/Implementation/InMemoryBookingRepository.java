@@ -1,6 +1,7 @@
 package repository.Implementation;
 
 import model.Booking;
+import model.BookingStatus;
 import repository.BookingRepository;
 
 import java.util.HashMap;
@@ -12,7 +13,7 @@ public class InMemoryBookingRepository implements BookingRepository {
 
     public InMemoryBookingRepository() {
         this.bookingMap = new HashMap<>();
-        bookingMap.put("123456789", new Booking("123456789", "CBE", "TBM", 1, 1));
+        bookingMap.put("123456789", new Booking("123456789", "CBE", "TBM", 1, 1, BookingStatus.ACTIVE));
     }
 
     @Override
@@ -37,4 +38,9 @@ public class InMemoryBookingRepository implements BookingRepository {
 
     @Override
     public Booking getBookingById(String pnr){return bookingMap.getOrDefault(pnr, null);}
+
+    @Override
+    public void updateStatus(String pnr, BookingStatus status) {
+        bookingMap.get(pnr).setStatus(status);
+    }
 }
