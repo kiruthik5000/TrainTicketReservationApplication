@@ -11,4 +11,5 @@ public interface BookingRepository {
     boolean isMatchPnr(String pnr);
     Booking getBookingById(String pnr);
     void updateStatus(String pnr, BookingStatus status);
+    List<Booking> getAllBookingsByTrainId(int trainId);
 }

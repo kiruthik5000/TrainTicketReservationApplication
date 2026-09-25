@@ -43,4 +43,12 @@ public class InMemoryBookingRepository implements BookingRepository {
     public void updateStatus(String pnr, BookingStatus status) {
         bookingMap.get(pnr).setStatus(status);
     }
+
+    @Override
+    public List<Booking> getAllBookingsByTrainId(int trainId) {
+        return bookingMap.values()
+                .stream()
+                .filter(booking -> booking.getTrainId() == trainId)
+                .toList();
+    }
 }

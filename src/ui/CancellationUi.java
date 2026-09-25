@@ -34,9 +34,11 @@ public class CancellationUi {
         Booking selectedBooking = bookingList.get(choice - 1);
         BookingResponseDto dto = bookingService.getBookingDetails(selectedBooking.getBookingId());
         System.out.println(dto);
+        System.out.println();
         System.out.println("1. Cancel Entire Booking");
         System.out.println("2. Cancel Partial Booking");
         System.out.println("3. return");
+        System.out.println();
         choice = InputHandler.getNumericValue("Choice", 3);
         if (choice == 1) {
             if (cancellationService.cancelFullBooking(selectedBooking.getBookingId())) {
@@ -47,6 +49,7 @@ public class CancellationUi {
         }
         if (choice == 2) {
             Set<Integer> selectedPassengers = gatherPassengersNeedToRemove(selectedBooking.getBookingId(), selectedBooking.getTrainId());
+
             if (selectedPassengers.isEmpty()) {
                 System.out.println("No passengers selected.");
                 return;
@@ -69,9 +72,9 @@ public class CancellationUi {
         }
         Set<Integer> passengerIndex = getAllPassengerIndex(passengers.size());
         System.out.println("Selected passengers: ");
-        for (PassengerResponseDto dto : passengers) {
-            if (passengerIndex.contains(dto.getpId())) {
-                System.out.println(dto);
+        for (int i : passengerIndex) {
+            if (i >= 0 && i < passengers.size()) {
+                System.out.println(passengers.get(i));
             }
         }
         return passengerIndex;
@@ -86,7 +89,9 @@ public class CancellationUi {
             try {
                 int index = Integer.parseInt(v.trim());
                 if (index < 1 || index > limit) throw new InvalidInputException("Invalid Passenger Index");
-                selected.add(index);
+                System.out.println("stored index");
+                System.out.println(index);
+                selected.add(index - 1);
             } catch (NumberFormatException e) { System.out.println( "Invalid input: " + v ); }
         }
         return selected;

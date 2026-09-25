@@ -7,10 +7,12 @@ public class MainMenuUi {
     private final UserUi userUi;
     private final BookingUi bookingUi;
     private final CancellationUi cancellationUi;
-    public MainMenuUi(UserUi userUi, BookingUi bookingUi, CancellationUi cancellationUi) {
+    private final AdminUI adminUI;
+    public MainMenuUi(UserUi userUi, BookingUi bookingUi, CancellationUi cancellationUi, AdminUI adminUI) {
         this.userUi = userUi;
         this.bookingUi = bookingUi;
         this.cancellationUi = cancellationUi;
+        this.adminUI = adminUI;
     }
 
     public void start() throws Exception {
@@ -23,13 +25,14 @@ public class MainMenuUi {
             System.out.println("3. Book Tickets");
             System.out.println("4. Cancel Tickets");
             System.out.println("5. Show Bookings");
+            System.out.println("6. Show All Passengers in Train");
             if (SessionStorage.getCurrentUser() != null) {
-                System.out.println("6. Logout");
+                System.out.println("7. Logout");
             } else {
-                System.out.println("6. Exit");
+                System.out.println("7. Exit");
             }
 
-            int choice = InputHandler.getNumericValue("choice", 6);
+            int choice = InputHandler.getNumericValue("choice", 7);
 
             switch (choice) {
                 case 1:
@@ -48,6 +51,9 @@ public class MainMenuUi {
                     showBookings();
                     break;
                 case 6:
+                    showAllPassengersInTrain();
+                    break;
+                case 7:
                     if (exit()) break;
                     return;
                 default:
@@ -86,6 +92,7 @@ public class MainMenuUi {
             cancellationUi.cancelTickets();
         } catch (Exception e) {
             System.out.println("Error Occurred in cancellation "+e.getClass().getSimpleName()+e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -109,6 +116,14 @@ public class MainMenuUi {
             bookingUi.showBookings();
         } catch (Exception e) {
             System.out.println("Error Occurred in Showing Booking "+e.getClass().getSimpleName()+e.getMessage());
+        }
+    }
+
+    private void showAllPassengersInTrain() {
+        try {
+            adminUI.showAllPassengersInTrain();
+        } catch (Exception e) {
+            System.out.println("Error Occurred in Showing All passengers"+e.getClass().getSimpleName()+e.getMessage());
         }
     }
 }

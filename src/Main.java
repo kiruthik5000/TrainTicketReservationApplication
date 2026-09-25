@@ -1,14 +1,10 @@
 import repository.*;
 import repository.Implementation.*;
+import service.AdminService;
 import service.BookingService;
 import service.CancellationService;
 import service.UserService;
-import ui.BookingUi;
-import ui.CancellationUi;
-import ui.MainMenuUi;
-import ui.UserUi;
-
-import java.util.Random;
+import ui.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -23,12 +19,14 @@ public class Main {
         UserService userService = new UserService(userRepository);
         BookingService bookingService = new BookingService(trainRepository, seatRepository, bookingRepository, passengerRepository, waitingListRepository);
         CancellationService cancellationService = new CancellationService(bookingRepository, seatRepository, waitingListRepository, passengerRepository);
+        AdminService adminService = new AdminService(trainRepository, bookingRepository,passengerRepository,seatRepository, waitingListRepository);
 
         UserUi userUi = new UserUi(userService);
         BookingUi bookingUi = new BookingUi(bookingService);
         CancellationUi cancellationUi = new CancellationUi(cancellationService, bookingService);
+        AdminUI adminUI = new AdminUI(adminService);
 
-        MainMenuUi mainMenuUI = new MainMenuUi(userUi, bookingUi, cancellationUi);
+        MainMenuUi mainMenuUI = new MainMenuUi(userUi, bookingUi, cancellationUi, adminUI);
         mainMenuUI.start();
     }
 }

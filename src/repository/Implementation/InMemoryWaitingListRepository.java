@@ -63,14 +63,14 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
     @Override
     public void removeRacPassenger(int pId, int trainId) {
         if (racList.containsKey(trainId)) {
-            racList.get(trainId).remove(pId);
+            racList.get(trainId).remove(Integer.valueOf(pId));
         }
     }
 
     @Override
     public void removeWlPassenger(int pId, int trainId) {
         if (wlList.containsKey(trainId)) {
-            wlList.get(trainId).remove(pId);
+            wlList.get(trainId).remove(Integer.valueOf(pId));
         }
     }
 

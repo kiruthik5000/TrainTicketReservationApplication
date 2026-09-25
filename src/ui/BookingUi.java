@@ -3,6 +3,7 @@ package ui;
 import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
 import exception.InvalidInputException;
+import exception.ItemNotFoundException;
 import model.Booking;
 import model.Train;
 import service.BookingService;
@@ -22,10 +23,12 @@ public class BookingUi {
     public void bookTickets() throws Exception {
         String from = InputHandler.getStringValue("Departure Station code");
         String to = InputHandler.getStringValue("Arrival Station code");
+        System.out.println();
         List<Train> trainList = bookingService.getAllTrains();
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1)+". "+trainList.get(i));
         }
+        System.out.println();
         int choice = InputHandler.getNumericValue("Train Index", trainList.size());
         Train selectedTrain = trainList.get(choice - 1);
         System.out.println("------------------------");
@@ -39,10 +42,12 @@ public class BookingUi {
 
     public void showBookings() throws Exception {
         List<Booking> bookings = bookingService.getAllBookings();
+        if (bookings == null || bookings.isEmpty()) throw new ItemNotFoundException("No bookings found for your account");
         for (int i=0; i<bookings.size(); i++) {
             Booking curBooking = bookings.get(i);
-            System.out.println((i + 1)+". pnr: "+curBooking.getBookingId()+"\t"+curBooking.getFrom()+" - "+curBooking.getTo()+"\t"+LocalDate.now());
+            System.out.println((i + 1)+". pnr: "+curBooking.getBookingId()+"\t"+curBooking.getFrom()+" - "+curBooking.getTo()+"\t"+curBooking.getStatus());
         }
+        System.out.println();
         int choice = InputHandler.getNumericValue("Booking Index", bookings.size());
         BookingResponseDto selectedBooking = bookingService.getBookingDetails(bookings.get(choice - 1).getBookingId());
         System.out.println(selectedBooking);

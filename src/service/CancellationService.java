@@ -69,6 +69,9 @@ public class CancellationService {
         for (Passenger p : passengers) {
             if (selectedPassengers.contains(p.getPassengerId())) {
                 if (p.getStatus().equals(PassengerStatus.CNF)) {
+                    if (p.getSeatId() != -1) {
+                        seatRepository.updateStatus(p.getSeatId(), SeatStatus.AVAILABLE);
+                    }
                     passengerRepository.updatePassengerStatusAndSeatNo(p.getPassengerId(), PassengerStatus.CANCELLED, -1);
                 } else {
                     waitingListPassengers.add(p);
