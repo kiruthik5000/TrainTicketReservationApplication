@@ -3,7 +3,6 @@ package ui;
 import dto.UserRequestDto;
 import service.UserService;
 import utils.InputHandler;
-import utils.SessionStorage;
 
 public class UserUi {
 
@@ -13,7 +12,7 @@ public class UserUi {
         this.userService = userService;
     }
 
-    public void login() throws Exception{
+    public void login() {
         String email = InputHandler.getStringValue("email");
         String password = InputHandler.getStringValue("password");
         if (userService.login(email, password)) {
@@ -21,16 +20,15 @@ public class UserUi {
         }
     }
 
-    public void register() throws Exception {
+    public void register() {
         String username = InputHandler.getStringValue("username");
         String email = InputHandler.getStringValue("email");
         String password = InputHandler.getStringValue("password");
         UserRequestDto dto = new UserRequestDto(username, email, password);
-        if (userService.saveUser(dto)) {
-            System.out.println("Successfully Registered!");
-        }
+        userService.saveUser(dto);
+        System.out.println("Successfully Registered!");
     }
-    public void logout() throws Exception {
+    public void logout() {
         userService.logout();
     }
  }

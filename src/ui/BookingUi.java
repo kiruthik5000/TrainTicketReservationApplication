@@ -8,8 +8,8 @@ import model.Booking;
 import model.Train;
 import service.BookingService;
 import utils.InputHandler;
+import utils.SessionStorage;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +21,7 @@ public class BookingUi {
     }
 
     public void bookTickets() throws Exception {
+        if (!SessionStorage.userIsLogin()) return;
         String from = InputHandler.getStringValue("Departure Station code");
         String to = InputHandler.getStringValue("Arrival Station code");
         System.out.println();
@@ -41,6 +42,7 @@ public class BookingUi {
     }
 
     public void showBookings() throws Exception {
+        if(!SessionStorage.userIsLogin()) return;
         List<Booking> bookings = bookingService.getAllBookings();
         if (bookings == null || bookings.isEmpty()) throw new ItemNotFoundException("No bookings found for your account");
         for (int i=0; i<bookings.size(); i++) {
@@ -67,9 +69,6 @@ public class BookingUi {
                 passengerList.add(new PassengerRequestDto(name, age));
             } else break;
         }
-        if (passengerList.isEmpty()) throw new InvalidInputException("No Passenger Added");
         return passengerList;
     }
-
-
 }

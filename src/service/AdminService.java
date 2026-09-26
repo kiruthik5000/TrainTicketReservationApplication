@@ -35,6 +35,7 @@ public class AdminService {
         }
         List<PassengerResponseDto> passengerResponse = new ArrayList<>();
         for (Passenger p : passengers) {
+            if(p.getStatus().equals(PassengerStatus.CANCELLED)) continue;
             int seatNo;
             if (p.getStatus().equals(PassengerStatus.CNF)) {
                 seatNo = seatRepository.getSeatById(p.getSeatId()).getSeatNo();

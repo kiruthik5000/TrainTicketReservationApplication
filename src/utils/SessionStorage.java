@@ -1,5 +1,6 @@
 package utils;
 
+import exception.UnAuthorizedAccessException;
 import model.User;
 
 public class SessionStorage {
@@ -23,5 +24,11 @@ public class SessionStorage {
 
     public static User getCurrentUser() {
         return currentUser;
+    }
+
+    public static boolean userIsLogin() {
+        User currentUser = SessionStorage.getCurrentUser();
+        if (currentUser == null) throw new UnAuthorizedAccessException("User must login to perform Operation");
+        return true;
     }
 }

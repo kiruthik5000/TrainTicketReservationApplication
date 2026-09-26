@@ -1,10 +1,7 @@
 package service;
 
 import dto.UserRequestDto;
-import exception.IncorrectPasswordException;
-import exception.InvalidInputException;
-import exception.UserAlreadyExistException;
-import exception.UserNotFoundException;
+import exception.*;
 import model.User;
 import repository.UserRepository;
 import utils.SessionStorage;
@@ -17,13 +14,14 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public boolean saveUser(UserRequestDto dto) {
-        if (!validateEmail(dto.getEmail()) || !validatePassword(dto.getPassword())) return false;
+    public void saveUser(UserRequestDto dto) {
+        if (dto == null || dto.getEmail() == null || dto.getPassword() == null || dto.getUsername() == null) throw new InvalidInputException("Entered User data is Invalid");
+        if (!validateEmail(dto.getEmail()) || !validatePassword(dto.getPassword())) return;
         User newUser = new User(0,
                 dto.getUsername(),
                 dto.getEmail(),
                 dto.getPassword());
-        return userRepository.save(newUser) != null;
+        userRepository.save(newUser);
     }
 
     public boolean login(String email, String password) {
@@ -35,6 +33,7 @@ public class UserService {
     }
 
     private boolean validateEmail(String email) {
+        if (email == null || email.trim().isEmpty()) throw new InvalidInputException("Email is Invalid");
         User existingUser = userRepository.getUserByEmail(email);
         if (existingUser != null) throw new UserAlreadyExistException("User Already Exists with this email");
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
@@ -43,7 +42,8 @@ public class UserService {
     }
 
     private boolean validatePassword(String password) {
-        if (password.length() < 6) throw new InvalidInputException("Password Must be 6 letters long");
+        if (password ==  null || password.trim().isEmpty()) throw new InvalidInputException("Password is Invalid");
+        if (password.length() < 6) throw new InvalidInputException("Password must contain at least 6 characters");
         return true;
     }
 

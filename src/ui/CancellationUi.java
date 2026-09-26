@@ -8,6 +8,7 @@ import model.BookingStatus;
 import service.BookingService;
 import service.CancellationService;
 import utils.InputHandler;
+import utils.SessionStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ public class CancellationUi {
     }
 
     public void cancelTickets() throws NoSuchFieldException {
+        if (!SessionStorage.userIsLogin()) return;
         List<Booking> bookingList = bookingService.getAllBookings();
         for (int i=0; i<bookingList.size(); i++) {
             Booking curBooking = bookingList.get(i);
