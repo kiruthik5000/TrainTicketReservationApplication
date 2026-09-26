@@ -2,13 +2,11 @@ package service;
 
 import exception.InvalidInputException;
 import exception.ItemNotFoundException;
-import exception.UnAuthorizedAccessException;
 import model.*;
 import repository.BookingRepository;
 import repository.PassengerRepository;
 import repository.SeatRepository;
 import repository.WaitingListRepository;
-import utils.SessionStorage;
 
 import java.util.List;
 import java.util.Set;
@@ -92,11 +90,12 @@ public class CancellationService {
      }
 
     public boolean partialCancellation(String pnr, Set<Integer> selectedPassengers) {
-        if (SessionStorage.getCurrentUser() == null) throw new UnAuthorizedAccessException("User must logIn to Cancel Booking");
         Booking booking = bookingRepository.getBookingById(pnr);
         if (booking == null) throw new InvalidInputException("No booking found for this PNR");
         if (selectedPassengers == null || selectedPassengers.isEmpty()) { throw new InvalidInputException( "Select at least one passenger" ); }
+
         List<Passenger> passengers = passengerRepository.getPassengerByBooking(pnr);
+
         for (Passenger p : passengers) {
             if (selectedPassengers.contains(p.getPassengerId())) {
                 if (p.getStatus().equals(PassengerStatus.CANCELLED)) continue;

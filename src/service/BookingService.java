@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookingService {
+    private long pnr = 4000000000L;
     private final TrainRepository trainRepository;
     private final SeatRepository seatRepository;
     private final BookingRepository bookingRepository;
@@ -130,7 +131,11 @@ public class BookingService {
         return passengerResponseDtos;
     }
     private String generatePNR() {
-        long basePnr = 4000000000L;
-        return String.valueOf(basePnr++);
+        pnr++;
+        return String.valueOf(pnr);
+    }
+
+    public List<Booking> getActiveBookings() {
+        return bookingRepository.getActiveBookings(SessionStorage.getCurrentUser().getUserId());
     }
 }

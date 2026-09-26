@@ -15,7 +15,7 @@ public class MainMenuUi {
         this.adminUI = adminUI;
     }
 
-    public void start() throws Exception {
+    public void start() {
         while (true) {
             System.out.println("---- Welcome To Train Ticket Reservation System ----\n");
             if (SessionStorage.getCurrentUser() == null) {
@@ -92,7 +92,6 @@ public class MainMenuUi {
             cancellationUi.cancelTickets();
         } catch (Exception e) {
             System.out.println("Error Occurred in cancellation "+e.getClass().getSimpleName()+e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -123,7 +122,7 @@ public class MainMenuUi {
         try {
             adminUI.showAllPassengersInTrain();
         } catch (Exception e) {
-            System.out.println("Error Occurred in Showing All passengers"+e.getClass().getSimpleName()+e.getMessage());
+            System.out.println("Error Occurred in Showing All passengers "+e.getClass().getSimpleName()+e.getMessage());
         }
     }
 }

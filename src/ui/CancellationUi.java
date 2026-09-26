@@ -10,7 +10,6 @@ import service.CancellationService;
 import utils.InputHandler;
 import utils.SessionStorage;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,9 +22,9 @@ public class CancellationUi {
         this.bookingService = bookingService;
     }
 
-    public void cancelTickets() throws NoSuchFieldException {
+    public void cancelTickets() {
         if (!SessionStorage.userIsLogin()) return;
-        List<Booking> bookingList = bookingService.getAllBookings();
+        List<Booking> bookingList = bookingService.getActiveBookings();
         for (int i=0; i<bookingList.size(); i++) {
             Booking curBooking = bookingList.get(i);
             if (curBooking.getStatus().equals(BookingStatus.ACTIVE)) {
@@ -63,7 +62,6 @@ public class CancellationUi {
             }
         }
 
-        if (choice == 3)return;
     }
 
     private Set<Integer> gatherPassengersNeedToRemove(String pnr, int trainId) {
@@ -72,7 +70,7 @@ public class CancellationUi {
         for (int i=0; i<passengers.size(); i++) {
             System.out.println((i + 1)+". "+passengers.get(i));
         }
-        Set<Integer> passengerIndex = getAllPassengerIndex(passengers.size());
+        Set<Integer> passengerIndex = getAllPassengerIndex(passengers, passengers.size());
         System.out.println("Selected passengers: ");
         for (int i : passengerIndex) {
             if (i >= 0 && i < passengers.size()) {
@@ -82,7 +80,7 @@ public class CancellationUi {
         return passengerIndex;
     }
 
-    private Set<Integer> getAllPassengerIndex(int limit) {
+    private Set<Integer> getAllPassengerIndex(List<PassengerResponseDto> dtos, int limit) {
         String input = InputHandler.getStringValue("Index of Passengers separated by comma ','");
         Set<Integer> selected = new HashSet<>();
         String[] indexes = input.split(",");
@@ -91,9 +89,10 @@ public class CancellationUi {
             try {
                 int index = Integer.parseInt(v.trim());
                 if (index < 1 || index > limit) throw new InvalidInputException("Invalid Passenger Index");
-                System.out.println("stored index");
-                System.out.println(index);
-                selected.add(index - 1);
+                PassengerResponseDto selectedPassenger = dtos.get(index - 1);
+                if (selectedPassenger != null) {
+                    selected.add(selectedPassenger.getpId());
+                }
             } catch (NumberFormatException e) { System.out.println( "Invalid input: " + v ); }
         }
         return selected;

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryBookingRepository implements BookingRepository {
-    private Map<String, Booking> bookingMap;
+    private final Map<String, Booking> bookingMap;
 
     public InMemoryBookingRepository() {
         this.bookingMap = new HashMap<>();
@@ -26,14 +26,8 @@ public class InMemoryBookingRepository implements BookingRepository {
     }
 
     @Override
-    public Booking addBooking(Booking booking) {
+    public void addBooking(Booking booking) {
         bookingMap.put(booking.getBookingId(), booking);
-        return booking;
-    }
-
-    @Override
-    public boolean isMatchPnr(String pnr) {
-        return bookingMap.containsKey(pnr);
     }
 
     @Override
@@ -49,6 +43,15 @@ public class InMemoryBookingRepository implements BookingRepository {
         return bookingMap.values()
                 .stream()
                 .filter(booking -> booking.getTrainId() == trainId)
+                .toList();
+    }
+
+    @Override
+    public List<Booking> getActiveBookings(int userId) {
+        return bookingMap
+                .values()
+                .stream()
+                .filter(b->b.getUserId()==userId && b.getStatus().equals(BookingStatus.ACTIVE))
                 .toList();
     }
 }
