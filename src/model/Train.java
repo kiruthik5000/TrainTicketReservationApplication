@@ -13,22 +13,7 @@ public class Train {
         this.trainType = trainType;
     }
 
-    public int getTrainId() {
-        return trainId;
-    }
-
-    public int getTrainNo() {
-        return trainNo;
-    }
-
-    public String getTrainName() {
-        return trainName;
-    }
-
-    public TrainType getTrainType() {
-        return trainType;
-    }
-
+    public int getTrainId() {return trainId;}
     @Override
     public String toString() {
         return "Train "+trainName+" ( "+trainNo+" ) : "+trainType.name();

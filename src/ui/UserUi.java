@@ -1,6 +1,7 @@
 package ui;
 
 import dto.UserRequestDto;
+import exception.DataBaseException;
 import service.UserService;
 import utils.InputHandler;
 
@@ -12,7 +13,7 @@ public class UserUi {
         this.userService = userService;
     }
 
-    public void login() {
+    public void login() throws DataBaseException {
         String email = InputHandler.getStringValue("email");
         String password = InputHandler.getStringValue("password");
         if (userService.login(email, password)) {
@@ -20,7 +21,7 @@ public class UserUi {
         }
     }
 
-    public void register() {
+    public void register() throws DataBaseException {
         String username = InputHandler.getStringValue("username");
         String email = InputHandler.getStringValue("email");
         String password = InputHandler.getStringValue("password");

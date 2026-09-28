@@ -1,5 +1,6 @@
 import repository.*;
-import repository.Implementation.*;
+import repository.Implementation.DataBase.DbUserRepository;
+import repository.Implementation.InMemory.*;
 import service.AdminService;
 import service.BookingService;
 import service.CancellationService;
@@ -7,9 +8,9 @@ import service.UserService;
 import ui.*;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
-        UserRepository userRepository = new InMemoryUserRepository();
+        UserRepository userRepository = new DbUserRepository();
         BookingRepository bookingRepository = new InMemoryBookingRepository();
         PassengerRepository passengerRepository = new InMemoryPassengerRepository();
         SeatRepository seatRepository = new InMemorySeatRepository();

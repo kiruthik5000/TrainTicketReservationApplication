@@ -2,6 +2,7 @@ package ui;
 
 import dto.BookingResponseDto;
 import dto.PassengerResponseDto;
+import exception.DataBaseException;
 import exception.InvalidInputException;
 import model.Booking;
 import model.BookingStatus;
@@ -22,7 +23,7 @@ public class CancellationUi {
         this.bookingService = bookingService;
     }
 
-    public void cancelTickets() {
+    public void cancelTickets() throws DataBaseException {
         if (!SessionStorage.userIsLogin()) return;
         List<Booking> bookingList = bookingService.getActiveBookings();
         for (int i=0; i<bookingList.size(); i++) {
@@ -64,7 +65,7 @@ public class CancellationUi {
 
     }
 
-    private Set<Integer> gatherPassengersNeedToRemove(String pnr, int trainId) {
+    private Set<Integer> gatherPassengersNeedToRemove(String pnr, int trainId) throws DataBaseException {
         List<PassengerResponseDto> passengers = bookingService.gatherPassengerDetails(pnr, trainId);
         System.out.println("\nPassengers:");
         for (int i=0; i<passengers.size(); i++) {

@@ -1,4 +1,4 @@
-package repository.Implementation;
+package repository.Implementation.InMemory;
 
 import model.Seat;
 import model.SeatStatus;

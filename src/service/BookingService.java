@@ -3,6 +3,7 @@ package service;
 import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
 import dto.PassengerResponseDto;
+import exception.DataBaseException;
 import exception.InvalidInputException;
 import exception.ItemNotFoundException;
 import exception.SeatNotFoundException;
@@ -29,7 +30,7 @@ public class BookingService {
         this.waitingListRepository = waitingListRepository;
     }
 
-    public List<Train> getAllTrains() {
+    public List<Train> getAllTrains() throws DataBaseException {
         return trainRepository.getAllTrains();
     }
 
@@ -43,7 +44,7 @@ public class BookingService {
         return "Regret No More booking";
     }
 
-    public BookingResponseDto bookTickets(int trainId, String from, String to, List<PassengerRequestDto> passengers) {
+    public BookingResponseDto bookTickets(int trainId, String from, String to, List<PassengerRequestDto> passengers) throws DataBaseException {
 
         if (passengers == null || passengers.isEmpty()) throw new InvalidInputException("No Passengers Provided");
 
@@ -80,7 +81,7 @@ public class BookingService {
         return bookingRepository.getBookingByUser(SessionStorage.getCurrentUser().getUserId());
     }
 
-    public BookingResponseDto getBookingDetails(String pnr) {
+    public BookingResponseDto getBookingDetails(String pnr) throws DataBaseException {
         Booking curBooking = bookingRepository.getBookingByPnr(pnr);
         if (curBooking == null) throw new ItemNotFoundException("No bookings found for this Account");
         Train curTrain = trainRepository.getTrainById(curBooking.getTrainId());
@@ -89,7 +90,7 @@ public class BookingService {
         return new BookingResponseDto(pnr, curBooking.getFrom(), curBooking.getTo(), curTrain, curPassengers.size(), curPassengers, curBooking.getStatus());
     }
 
-    private void updateWaitingQueue(int index, List<PassengerRequestDto> passengers, int trainId, String pnr, int racAvail, int wlAvail) {
+    private void updateWaitingQueue(int index, List<PassengerRequestDto> passengers, int trainId, String pnr, int racAvail, int wlAvail) throws DataBaseException {
 
         for (int i = index; i < passengers.size(); i++) {
             PassengerRequestDto curPassengerReq = passengers.get(i);
@@ -110,8 +111,8 @@ public class BookingService {
 
         }
     }
-    public List<PassengerResponseDto> gatherPassengerDetails(String pnr, int trainId) {
-        List<Passenger> passengers = passengerRepository.getPassengerByBooking(pnr);
+    public List<PassengerResponseDto> gatherPassengerDetails(String pnr, int trainId) throws DataBaseException {
+        List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(pnr);
         List<PassengerResponseDto> passengerResponseDtos = new ArrayList<>();
         for (Passenger p : passengers) {
             if (p.getStatus().equals(PassengerStatus.CANCELLED)) continue;

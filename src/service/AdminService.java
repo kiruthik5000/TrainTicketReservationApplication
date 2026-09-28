@@ -1,6 +1,7 @@
 package service;
 
 import dto.PassengerResponseDto;
+import exception.DataBaseException;
 import model.*;
 import repository.*;
 
@@ -23,15 +24,15 @@ public class AdminService {
         this.waitingListRepository = waitingListRepository;
     }
 
-    public List<Train> getAllTrains() {
+    public List<Train> getAllTrains() throws DataBaseException {
         return trainRepository.getAllTrains();
     }
 
-    public List<PassengerResponseDto> showAllPassengersInTrain(int trainId) {
+    public List<PassengerResponseDto> showAllPassengersInTrain(int trainId) throws DataBaseException {
         List<Booking> bookings = bookingRepository.getAllBookingsByTrainId(trainId);
         List<Passenger> passengers = new ArrayList<>();
         for (Booking b : bookings) {
-            passengers.addAll(passengerRepository.getPassengerByBooking(b.getPnr()));
+            passengers.addAll(passengerRepository.getPassengerByBookingPnr(b.getPnr()));
         }
         List<PassengerResponseDto> passengerResponse = new ArrayList<>();
         for (Passenger p : passengers) {

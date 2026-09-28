@@ -1,4 +1,4 @@
-package repository.Implementation;
+package repository.Implementation.InMemory;
 
 import model.Passenger;
 import model.PassengerStatus;
@@ -17,11 +17,11 @@ public class InMemoryPassengerRepository implements PassengerRepository {
         passengerMap.put(1, new Passenger(1, "admin", 25, PassengerStatus.CNF,"123456789", 1));
     }
 
-    public List<Passenger> getPassengerByBooking(String bookingId) {
+    public List<Passenger> getPassengerByBookingPnr(String pnr) {
         return passengerMap
                 .values()
                 .stream()
-                .filter(k -> k.getBookingId().equals(bookingId))
+                .filter(k -> k.getPnr().equals(pnr))
                 .toList();
     }
 

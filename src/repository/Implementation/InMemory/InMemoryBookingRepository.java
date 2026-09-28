@@ -1,4 +1,4 @@
-package repository.Implementation;
+package repository.Implementation.InMemory;
 
 import model.Booking;
 import model.BookingStatus;

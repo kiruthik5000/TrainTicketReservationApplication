@@ -1,4 +1,4 @@
-package repository.Implementation;
+package repository.Implementation.InMemory;
 
 import model.User;
 import repository.UserRepository;
@@ -28,9 +28,8 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User save(User user) {
+    public void save(User user) {
         user.setUserId(++nextUserId);
         userMap.put(nextUserId, user);
-        return user;
     }
 }

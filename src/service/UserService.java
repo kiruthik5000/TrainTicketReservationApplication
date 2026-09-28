@@ -14,7 +14,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void saveUser(UserRequestDto dto) {
+    public void saveUser(UserRequestDto dto) throws DataBaseException {
         if (dto == null || dto.getEmail() == null || dto.getPassword() == null || dto.getUsername() == null) throw new InvalidInputException("Entered User data is Invalid");
         if (!validateEmail(dto.getEmail()) || !validatePassword(dto.getPassword())) return;
         User newUser = new User(0,
@@ -24,7 +24,7 @@ public class UserService {
         userRepository.save(newUser);
     }
 
-    public boolean login(String email, String password) {
+    public boolean login(String email, String password) throws DataBaseException {
         if (SessionStorage.getCurrentUser() != null) throw new InvalidInputException("User Already loggedIn");
         User user = userRepository.getUserByEmail(email);
         if (user == null) throw new UserNotFoundException("User not found for this email");
@@ -32,7 +32,7 @@ public class UserService {
         return SessionStorage.storeUser(user);
     }
 
-    private boolean validateEmail(String email) {
+    private boolean validateEmail(String email) throws DataBaseException {
         if (email == null || email.trim().isEmpty()) throw new InvalidInputException("Email is Invalid");
         User existingUser = userRepository.getUserByEmail(email);
         if (existingUser != null) throw new UserAlreadyExistException("User Already Exists with this email");

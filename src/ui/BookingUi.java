@@ -2,6 +2,7 @@ package ui;
 
 import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
+import exception.DataBaseException;
 import exception.ItemNotFoundException;
 import model.Booking;
 import model.Train;
@@ -19,7 +20,7 @@ public class BookingUi {
         this.bookingService = bookingService;
     }
 
-    public void bookTickets() {
+    public void bookTickets() throws DataBaseException {
         if (!SessionStorage.userIsLogin()) return;
         String from = InputHandler.getStringValue("Departure Station code");
         String to = InputHandler.getStringValue("Arrival Station code");
@@ -40,7 +41,7 @@ public class BookingUi {
         System.out.println(responseDto);
     }
 
-    public void showBookings() {
+    public void showBookings() throws DataBaseException {
         if(!SessionStorage.userIsLogin()) return;
         List<Booking> bookings = bookingService.getAllBookings();
         if (bookings == null || bookings.isEmpty()) throw new ItemNotFoundException("No bookings found for your account");

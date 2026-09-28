@@ -1,6 +1,7 @@
 package ui;
 
 import dto.PassengerResponseDto;
+import exception.DataBaseException;
 import model.Train;
 import service.AdminService;
 import utils.InputHandler;
@@ -14,7 +15,7 @@ public class AdminUI {
         this.adminService = adminService;
     }
 
-    public void showAllPassengersInTrain() {
+    public void showAllPassengersInTrain() throws DataBaseException {
         List<Train> trainList = adminService.getAllTrains();
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1) +". "+ trainList.get(i));

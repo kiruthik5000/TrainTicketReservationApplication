@@ -1,5 +1,6 @@
 package service;
 
+import exception.DataBaseException;
 import exception.InvalidInputException;
 import exception.ItemNotFoundException;
 import model.*;
@@ -24,11 +25,11 @@ public class CancellationService {
         this.passengerRepository = passengerRepository;
     }
 
-    public boolean cancelFullBooking(String pnr) {
+    public boolean cancelFullBooking(String pnr) throws DataBaseException {
 
         Booking booking = bookingRepository.getBookingByPnr(pnr);
 
-        List<Passenger> passengers = passengerRepository.getPassengerByBooking(pnr);
+        List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(pnr);
         if (passengers == null || passengers.isEmpty()) throw new ItemNotFoundException("No Passenger found");
 
         for (Passenger p : passengers) {
@@ -41,7 +42,7 @@ public class CancellationService {
         return true;
     }
 
-    private void cancelPassenger(Passenger p, int trainId) {
+    private void cancelPassenger(Passenger p, int trainId) throws DataBaseException {
         if (p.getStatus().equals(PassengerStatus.CANCELLED)) return;
 
         if (p.getStatus().equals(PassengerStatus.CNF)) {
@@ -58,7 +59,7 @@ public class CancellationService {
         passengerRepository.updatePassengerStatusAndSeatNo(p.getPassengerId(), PassengerStatus.CANCELLED, -1);
     }
 
-    public void promoteWlListToCnf(int trainId) {
+    public void promoteWlListToCnf(int trainId) throws DataBaseException {
         List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId);
         for (Seat s : availableSeats) {
             int racPassengerId = waitingListRepository.getFirstRacPassenger(trainId);
@@ -79,7 +80,7 @@ public class CancellationService {
         promoteWlToRac(trainId);
      }
 
-     public void promoteWlToRac(int trainId) {
+     public void promoteWlToRac(int trainId) throws DataBaseException {
         int availableRac = waitingListRepository.getAvailableRac(trainId);
         for (int i=0; i<availableRac; i++) {
             int wlPassengerId = waitingListRepository.getFirstWlPassenger(trainId);
@@ -89,12 +90,12 @@ public class CancellationService {
         }
      }
 
-    public boolean partialCancellation(String pnr, Set<Integer> selectedPassengers) {
+    public boolean partialCancellation(String pnr, Set<Integer> selectedPassengers) throws DataBaseException {
         Booking booking = bookingRepository.getBookingByPnr(pnr);
         if (booking == null) throw new InvalidInputException("No booking found for this PNR");
         if (selectedPassengers == null || selectedPassengers.isEmpty()) { throw new InvalidInputException( "Select at least one passenger" ); }
 
-        List<Passenger> passengers = passengerRepository.getPassengerByBooking(pnr);
+        List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(pnr);
 
         for (Passenger p : passengers) {
             if (selectedPassengers.contains(p.getPassengerId())) {
@@ -109,8 +110,8 @@ public class CancellationService {
         return true;
     }
 
-    private boolean checkAllPassengersAreRemoved(String pnr) {
-        List<Passenger> passengers = passengerRepository.getPassengerByBooking(pnr);
+    private boolean checkAllPassengersAreRemoved(String pnr) throws DataBaseException {
+        List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(pnr);
         for (Passenger p : passengers) {
             if (!p.getStatus().equals(PassengerStatus.CANCELLED)) {
                 return false;
