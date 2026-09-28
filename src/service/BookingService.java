@@ -69,7 +69,7 @@ public class BookingService {
          if (cnfAvail < totalPassengers) {
              updateWaitingQueue(cnfCnt, passengers, trainId, pnr, racAvail, wlAvail);
          }
-         Booking currentBooking = new Booking(pnr, from, to, trainId, SessionStorage.getCurrentUser().getUserId(), BookingStatus.ACTIVE);
+         Booking currentBooking = new Booking(0, pnr, from, to, trainId, SessionStorage.getCurrentUser().getUserId(), BookingStatus.ACTIVE);
          bookingRepository.addBooking(currentBooking);
 
          List<PassengerResponseDto> addedPassengers = gatherPassengerDetails(pnr, trainId);
@@ -81,7 +81,7 @@ public class BookingService {
     }
 
     public BookingResponseDto getBookingDetails(String pnr) {
-        Booking curBooking = bookingRepository.getBookingById(pnr);
+        Booking curBooking = bookingRepository.getBookingByPnr(pnr);
         if (curBooking == null) throw new ItemNotFoundException("No bookings found for this Account");
         Train curTrain = trainRepository.getTrainById(curBooking.getTrainId());
         if (curTrain == null) throw new ItemNotFoundException("No Train found for this trainId"+curBooking.getTrainId());

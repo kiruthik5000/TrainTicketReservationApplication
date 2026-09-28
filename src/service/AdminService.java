@@ -31,7 +31,7 @@ public class AdminService {
         List<Booking> bookings = bookingRepository.getAllBookingsByTrainId(trainId);
         List<Passenger> passengers = new ArrayList<>();
         for (Booking b : bookings) {
-            passengers.addAll(passengerRepository.getPassengerByBooking(b.getBookingId()));
+            passengers.addAll(passengerRepository.getPassengerByBooking(b.getPnr()));
         }
         List<PassengerResponseDto> passengerResponse = new ArrayList<>();
         for (Passenger p : passengers) {

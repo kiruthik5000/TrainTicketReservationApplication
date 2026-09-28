@@ -26,7 +26,7 @@ public class CancellationService {
 
     public boolean cancelFullBooking(String pnr) {
 
-        Booking booking = bookingRepository.getBookingById(pnr);
+        Booking booking = bookingRepository.getBookingByPnr(pnr);
 
         List<Passenger> passengers = passengerRepository.getPassengerByBooking(pnr);
         if (passengers == null || passengers.isEmpty()) throw new ItemNotFoundException("No Passenger found");
@@ -37,7 +37,7 @@ public class CancellationService {
 
         promoteWlListToCnf(booking.getTrainId());
 
-        bookingRepository.updateStatus(pnr, BookingStatus.CANCELLED);
+        bookingRepository.updateStatus(booking.getBookingId(), BookingStatus.CANCELLED);
         return true;
     }
 
@@ -90,7 +90,7 @@ public class CancellationService {
      }
 
     public boolean partialCancellation(String pnr, Set<Integer> selectedPassengers) {
-        Booking booking = bookingRepository.getBookingById(pnr);
+        Booking booking = bookingRepository.getBookingByPnr(pnr);
         if (booking == null) throw new InvalidInputException("No booking found for this PNR");
         if (selectedPassengers == null || selectedPassengers.isEmpty()) { throw new InvalidInputException( "Select at least one passenger" ); }
 
@@ -104,7 +104,7 @@ public class CancellationService {
         }
         promoteWlListToCnf(booking.getTrainId());
         if (checkAllPassengersAreRemoved(pnr)) {
-            bookingRepository.updateStatus(pnr, BookingStatus.CANCELLED);
+            bookingRepository.updateStatus(booking.getBookingId(), BookingStatus.CANCELLED);
         }
         return true;
     }

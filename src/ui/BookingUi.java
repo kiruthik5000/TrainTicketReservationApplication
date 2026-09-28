@@ -46,11 +46,11 @@ public class BookingUi {
         if (bookings == null || bookings.isEmpty()) throw new ItemNotFoundException("No bookings found for your account");
         for (int i=0; i<bookings.size(); i++) {
             Booking curBooking = bookings.get(i);
-            System.out.println((i + 1)+". pnr: "+curBooking.getBookingId()+"\t"+curBooking.getFrom()+" - "+curBooking.getTo()+"\t"+curBooking.getStatus());
+            System.out.println((i + 1)+". pnr: "+curBooking.getPnr()+"\t"+curBooking.getFrom()+" - "+curBooking.getTo()+"\t"+curBooking.getStatus());
         }
         System.out.println();
         int choice = InputHandler.getNumericValue("Booking Index", bookings.size());
-        BookingResponseDto selectedBooking = bookingService.getBookingDetails(bookings.get(choice - 1).getBookingId());
+        BookingResponseDto selectedBooking = bookingService.getBookingDetails(bookings.get(choice - 1).getPnr());
         System.out.println(selectedBooking);
     }
 
