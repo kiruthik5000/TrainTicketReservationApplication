@@ -16,11 +16,10 @@ public class DbTrainRepository implements TrainRepository {
     @Override
     public List<Train> getAllTrains() throws DataBaseException {
         String query = "SELECT * FROM train;";
-
         try (
                 Connection connection = DbUtils.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                ) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)
+        ) {
             ResultSet rs = preparedStatement.executeQuery();
             List<Train> trains = new ArrayList<>();
             while (rs.next()) {
@@ -45,9 +44,9 @@ public class DbTrainRepository implements TrainRepository {
 
         try (
                 Connection connection = DbUtils.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                ) {
-            preparedStatement.setInt(1, trainId);
+                PreparedStatement preparedStatement = connection.prepareStatement(query)
+        ) {
+            preparedStatement.setObject(1, trainId);
             ResultSet rs = preparedStatement.executeQuery();
 
             if (rs.next()) {

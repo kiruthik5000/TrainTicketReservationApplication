@@ -1,7 +1,9 @@
 package utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import exception.DataBaseException;
+
+import java.sql.*;
+import java.util.List;
 
 public class DbUtils {
     public static Connection getConnection() {
@@ -13,11 +15,32 @@ public class DbUtils {
         return null;
     }
 
-    public static void closeConnection(Connection connection) {
-        try {
-            connection.close();
+    public static <T> void executeUpdateQuery(String q, List<T> objects) throws DataBaseException {
+        try (
+                Connection connection = getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(q)
+                ) {
+            for (int i=0; i<objects.size(); i++) {
+                preparedStatement.setObject((i + 1), objects.get(i));
+            }
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> void executeInsertQuery(String q, List<T> objects) throws DataBaseException {
+        try (
+                Connection connection = getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(q)
+                ) {
+
+            for (int i=0; i<objects.size(); i++) {
+                preparedStatement.setObject((i + 1), objects.get(i));
+            }
+            preparedStatement.executeUpdate();
         } catch (Exception e) {
-            System.out.println("Unexpected Error Occurs Cannot close connection"+e.getMessage());
+            throw new DataBaseException(e.getMessage());
         }
     }
 }

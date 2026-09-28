@@ -43,17 +43,17 @@ public class CancellationService {
     }
 
     private void cancelPassenger(Passenger p, int trainId) throws DataBaseException {
-        if (p.getStatus().equals(PassengerStatus.CANCELLED)) return;
+        if (p.getStatus() == PassengerStatus.CANCELLED) return;
 
-        if (p.getStatus().equals(PassengerStatus.CNF)) {
+        if (p.getStatus() == PassengerStatus.CNF) {
             if (p.getSeatId() != -1) {
                 seatRepository.updateStatus(p.getSeatId(), SeatStatus.AVAILABLE);
             }
         }
-        if (p.getStatus().equals(PassengerStatus.RAC)) {
+        if (p.getStatus() == PassengerStatus.RAC) {
             waitingListRepository.removeRacPassenger(p.getPassengerId(), trainId);
         }
-        if (p.getStatus().equals(PassengerStatus.WL)) {
+        if (p.getStatus() == PassengerStatus.WL) {
             waitingListRepository.removeWlPassenger(p.getPassengerId(), trainId);
         }
         passengerRepository.updatePassengerStatusAndSeatNo(p.getPassengerId(), PassengerStatus.CANCELLED, -1);
@@ -64,13 +64,13 @@ public class CancellationService {
         for (Seat s : availableSeats) {
             int racPassengerId = waitingListRepository.getFirstRacPassenger(trainId);
             if (racPassengerId != -1) {
-                passengerRepository.updatePassengerStatusAndSeatNo(racPassengerId, PassengerStatus.CNF, s.getSeatNo());
+                passengerRepository.updatePassengerStatusAndSeatNo(racPassengerId, PassengerStatus.CNF, s.getSeatId());
                 seatRepository.updateStatus(s.getSeatId(), SeatStatus.BOOKED);
                 continue;
             }
             int wlPassengerId = waitingListRepository.getFirstWlPassenger(trainId);
             if (wlPassengerId != -1) {
-                passengerRepository.updatePassengerStatusAndSeatNo(wlPassengerId, PassengerStatus.CNF, s.getSeatNo());
+                passengerRepository.updatePassengerStatusAndSeatNo(wlPassengerId, PassengerStatus.CNF, s.getSeatId());
                 seatRepository.updateStatus(s.getSeatId(), SeatStatus.BOOKED);
                 continue;
             }
@@ -99,7 +99,7 @@ public class CancellationService {
 
         for (Passenger p : passengers) {
             if (selectedPassengers.contains(p.getPassengerId())) {
-                if (p.getStatus().equals(PassengerStatus.CANCELLED)) continue;
+                if (p.getStatus() == PassengerStatus.CANCELLED) continue;
                 cancelPassenger(p, booking.getTrainId());
             }
         }
@@ -113,7 +113,7 @@ public class CancellationService {
     private boolean checkAllPassengersAreRemoved(String pnr) throws DataBaseException {
         List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(pnr);
         for (Passenger p : passengers) {
-            if (!p.getStatus().equals(PassengerStatus.CANCELLED)) {
+            if (p.getStatus() != PassengerStatus.CANCELLED) {
                 return false;
             }
         }

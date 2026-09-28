@@ -1,5 +1,6 @@
 package repository.Implementation.InMemory;
 
+import exception.DataBaseException;
 import model.User;
 import repository.UserRepository;
 
@@ -19,7 +20,7 @@ public class InMemoryUserRepository implements UserRepository {
 
 
     @Override
-    public User getUserByEmail(String email) {
+    public User getUserByEmail(String email) throws DataBaseException {
         return userMap.values()
                 .stream()
                 .filter(k -> k.getEmail().equals(email))

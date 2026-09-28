@@ -8,7 +8,7 @@ import utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
+import java.util.List;
 
 public class DbUserRepository implements UserRepository {
 
@@ -16,39 +16,34 @@ public class DbUserRepository implements UserRepository {
     public User getUserByEmail(String email) throws DataBaseException {
         String query = "SELECT * FROM user WHERE email = ?;";
         try (
-            Connection connection = DbUtils.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)
-        ){
-            preparedStatement.setString(1, email);
-
+                Connection connection = DbUtils.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)
+        ) {
+            preparedStatement.setObject(1, email);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
                 return new User(
                         rs.getInt("userId"),
                         rs.getString("username"),
                         rs.getString("email"),
-                        rs.getString("password"));
+                        rs.getString("password")
+                );
             }
             return null;
-        } catch (Exception e) {
-            throw new DataBaseException("DB error occurs at User Table"+e.getMessage());
+        }catch (Exception e) {
+            throw new DataBaseException(e.getMessage());
         }
     }
-
     @Override
     public void save(User user) throws DataBaseException {
         String query = "INSERT INTO user(username, email, password) VALUES (?,?,?);";
 
-        try (
-            Connection connection = DbUtils.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)
-        ) {
-            preparedStatement.setString(1, user.getUsername());
-            preparedStatement.setString(2, user.getEmail());
-            preparedStatement.setString(3, user.getPassword());
-
-            preparedStatement.executeUpdate();
-
+       try{
+            DbUtils.executeUpdateQuery(query, List.of(
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getPassword()
+            ));
         } catch (Exception e) {
             throw new DataBaseException(e.getMessage());
         }

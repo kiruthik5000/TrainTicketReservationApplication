@@ -92,6 +92,7 @@ public class MainMenuUi {
             cancellationUi.cancelTickets();
         } catch (Exception e) {
             System.out.println("Error Occurred in cancellation "+e.getClass().getSimpleName()+e.getMessage());
+            e.printStackTrace();
         }
     }
 

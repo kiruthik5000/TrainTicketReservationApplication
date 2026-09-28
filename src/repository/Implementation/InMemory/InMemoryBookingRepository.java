@@ -1,5 +1,6 @@
 package repository.Implementation.InMemory;
 
+import exception.DataBaseException;
 import model.Booking;
 import model.BookingStatus;
 import repository.BookingRepository;
@@ -60,5 +61,10 @@ public class InMemoryBookingRepository implements BookingRepository {
                 .stream()
                 .filter(b->b.getUserId()==userId && b.getStatus().equals(BookingStatus.ACTIVE))
                 .toList();
+    }
+
+    @Override
+    public int getTotalNoRows() throws DataBaseException {
+        return bookingMap.size();
     }
 }

@@ -1,5 +1,5 @@
 import repository.*;
-import repository.Implementation.DataBase.DbUserRepository;
+import repository.Implementation.DataBase.*;
 import repository.Implementation.InMemory.*;
 import service.AdminService;
 import service.BookingService;
@@ -11,10 +11,10 @@ public class Main {
     public static void main(String[] args) {
 
         UserRepository userRepository = new DbUserRepository();
-        BookingRepository bookingRepository = new InMemoryBookingRepository();
-        PassengerRepository passengerRepository = new InMemoryPassengerRepository();
-        SeatRepository seatRepository = new InMemorySeatRepository();
-        TrainRepository trainRepository = new InMemoryTrainRepository();
+        BookingRepository bookingRepository = new DbBookingRepository();
+        PassengerRepository passengerRepository = new DbPassengerRepository();
+        SeatRepository seatRepository = new DbSeatRepository();
+        TrainRepository trainRepository = new DbTrainRepository();
         WaitingListRepository waitingListRepository = new InMemoryWaitingListRepository();
 
         UserService userService = new UserService(userRepository);
