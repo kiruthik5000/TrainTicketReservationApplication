@@ -4,6 +4,7 @@ import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
 import exception.DataBaseException;
 import exception.ItemNotFoundException;
+import exception.SeatNotFoundException;
 import model.Booking;
 import model.Train;
 import service.BookingService;
@@ -34,7 +35,9 @@ public class BookingUi {
         Train selectedTrain = trainList.get(choice - 1);
         System.out.println("------------------------");
         System.out.println(selectedTrain);
-        System.out.println("Seats: "+bookingService.getAvailableSeats(selectedTrain.getTrainId()));
+        String seatNo = bookingService.getAvailableSeats(selectedTrain.getTrainId());
+        if (seatNo.equals("Regret No More booking")) throw new SeatNotFoundException("Regret No More booking");
+        System.out.println("Seats: "+seatNo);
         List<PassengerRequestDto> passengersList = gatherPassengers();
         System.out.println("Selected "+passengersList.size()+" of Passengers");
         BookingResponseDto responseDto = bookingService.bookTickets(selectedTrain.getTrainId(), from, to, passengersList);
@@ -50,7 +53,7 @@ public class BookingUi {
             System.out.println((i + 1)+". pnr: "+curBooking.getPnr()+"\t"+curBooking.getFrom()+" - "+curBooking.getTo()+"\t"+curBooking.getStatus());
         }
         System.out.println();
-        int choice = InputHandler.getNumericValue("Booking Index", bookings.size());
+        int choice = InputHandler.getNumericValue("Booking Index to show passenger details", bookings.size());
         BookingResponseDto selectedBooking = bookingService.getBookingDetails(bookings.get(choice - 1).getPnr());
         System.out.println(selectedBooking);
     }

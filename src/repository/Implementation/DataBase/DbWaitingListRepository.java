@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+
 public class DbWaitingListRepository implements WaitingListRepository {
     public int racLimit = 2;
     public int wlLimit = 2;
@@ -25,9 +26,7 @@ public class DbWaitingListRepository implements WaitingListRepository {
             preparedStatement.setObject(1, trainId);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-                int curCnt = rs.getInt("cnt");
-                if (curCnt >= racLimit) return -1;
-                return curCnt + 1;
+                return rs.getInt("cnt");
             }
             return -1;
         } catch (Exception e) {
@@ -49,9 +48,7 @@ public class DbWaitingListRepository implements WaitingListRepository {
             preparedStatement.setObject(1, trainId);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-                int curCnt = rs.getInt("cnt");
-                if (curCnt >= wlLimit) return -1;
-                return curCnt + 1;
+                return rs.getInt("cnt");
             }
             return -1;
         } catch (Exception e) {
@@ -72,15 +69,15 @@ public class DbWaitingListRepository implements WaitingListRepository {
     @Override
     public int getAvailableRac(int trainId) throws DataBaseException {
         int curRac = getRACAvailabilityNo(trainId);
-        if (curRac == -1) return -1;
-        return racLimit - curRac - 1;
+//        System.out.println("Available RAC"+curRac);
+        return Math.max(0, racLimit - curRac);
     }
 
     @Override
     public int getAvailableWl(int trainId) throws DataBaseException {
         int curRac = getWLNAvailability(trainId);
-        if (curRac == -1) return -1;
-        return racLimit - curRac - 1;
+//        System.out.println("Available WL"+curRac);
+        return Math.max(0, wlLimit - curRac);
     }
 
     @Override
@@ -100,6 +97,7 @@ public class DbWaitingListRepository implements WaitingListRepository {
                 "join booking b\n" +
                 "on a.pnr = b.pnr\n" +
                 "WHERE a.status = 'RAC' and b.trainId = ?\n" +
+                "ORDER BY a.passengerId "+
                 "LIMIT 1;";
         try (
                 Connection connection = DbUtils.getConnection();
@@ -125,6 +123,7 @@ public class DbWaitingListRepository implements WaitingListRepository {
                 "join booking b\n" +
                 "on a.pnr = b.pnr\n" +
                 "WHERE a.status = 'WL' and b.trainId = ?\n" +
+                "ORDER BY a.passengerId "+
                 "LIMIT 1;";
         try (
                 Connection connection = DbUtils.getConnection();

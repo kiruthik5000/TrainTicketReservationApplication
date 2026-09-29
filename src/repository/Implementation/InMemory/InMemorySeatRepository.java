@@ -36,4 +36,12 @@ public class InMemorySeatRepository implements SeatRepository {
     public Seat getSeatById(int seatId) {
         return seatMap.getOrDefault(seatId, null);
     }
+
+    @Override
+    public void updateAllSeatStatus(String[] seatIds, SeatStatus status) {
+        for (String s : seatIds) {
+            int sId = Integer.parseInt(s);
+            seatMap.get(sId).setStatus(status);
+        }
+    }
 }

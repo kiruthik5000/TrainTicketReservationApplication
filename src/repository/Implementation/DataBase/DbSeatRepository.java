@@ -9,6 +9,7 @@ import utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,6 +74,22 @@ public class DbSeatRepository implements SeatRepository {
             return null;
         } catch (Exception e) {
             throw new DataBaseException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateAllSeatStatus(String[] seatIds, SeatStatus status) {
+        String query = "UPDATE seat SET status = ? WHERE seatId IN (%s);".formatted(String.join(", ", seatIds));
+        System.out.println("final Query " + query);
+
+        try (
+                Connection connection = DbUtils.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)
+        ) {
+            preparedStatement.setObject(1, status.name());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }

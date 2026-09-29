@@ -37,10 +37,10 @@ public class BookingService {
     public String getAvailableSeats(int trainId) throws DataBaseException {
         int cnfSeats = seatRepository.getAvailableSeats(trainId).size();
         if (cnfSeats > 0) return "CNF "+cnfSeats;
-        int racNo = waitingListRepository.getRACAvailabilityNo(trainId);
-        if (racNo != -1) return "RAC "+racNo;
-        int wlNo = waitingListRepository.getWLNAvailability(trainId);
-        if (wlNo != -1) return "WL "+wlNo;
+        int racNo = waitingListRepository.getAvailableRac(trainId);
+        if (racNo > 0) return "RAC "+racNo;
+        int wlNo = waitingListRepository.getAvailableWl(trainId);
+        if (wlNo > 0) return "WL "+wlNo;
         return "Regret No More booking";
     }
 
@@ -60,15 +60,19 @@ public class BookingService {
         String pnr = generatePNR();
         Booking currentBooking = new Booking(0, pnr, from, to, trainId, SessionStorage.getCurrentUser().getUserId(), BookingStatus.ACTIVE);
         bookingRepository.addBooking(currentBooking);
+        List<String> cnfSeatIds = new ArrayList<>();
 
         for (int i=0; i<cnfCnt; i++) {
              PassengerRequestDto curPassenger = passengers.get(i);
              Seat curSeat = availableSeats.get(i);
-             seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
+//             seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
+            cnfSeatIds.add(Integer.toString(curSeat.getSeatId()));
              Passenger cnfPassenger = new Passenger(0, curPassenger.getName(), curPassenger.getAge(), PassengerStatus.CNF, pnr, curSeat.getSeatId());
              passengerRepository.addPassenger(cnfPassenger);
          }
-
+        if (!cnfSeatIds.isEmpty()) {
+            seatRepository.updateAllSeatStatus(cnfSeatIds.toArray(new String[0]), SeatStatus.BOOKED);
+        }
          if (cnfAvail < totalPassengers) {
              updateWaitingQueue(cnfCnt, passengers, trainId, pnr, racAvail, wlAvail);
          }

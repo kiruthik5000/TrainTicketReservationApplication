@@ -22,20 +22,12 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
 
     @Override
     public int getRACAvailabilityNo(int trainId) {
-        int curSize = racList
-                .get(trainId)
-                .size();
-        if (curSize >= racLimit) return -1;
-        return curSize + 1;
+        return racList.getOrDefault(trainId, new LinkedList<>()).size();
     }
 
     @Override
     public int getWLNAvailability(int trainId) {
-        int curSize = wlList
-                .get(trainId)
-                .size();
-        if (curSize >= wlLimit) return -1;
-        return curSize + 1;
+        return wlList.getOrDefault(trainId, new LinkedList<>()).size();
     }
 
     @Override
@@ -76,35 +68,31 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
 
     @Override
     public int getFirstRacPassenger(int trainId) {
-        if (racList.containsKey(trainId) && !racList.get(trainId).isEmpty()) {
-            return racList.get(trainId).pollFirst();
-        }
+        LinkedList<Integer> list = racList.get(trainId);
+        if (list == null && !list.isEmpty()) return list.pollFirst();
         return -1;
     }
 
     @Override
     public int getFirstWlPassenger(int trainId) {
-        if (wlList.containsKey(trainId) && !wlList.get(trainId).isEmpty()) {
-            return wlList.get(trainId).pollFirst();
-        }
+        LinkedList<Integer> list = wlList.get(trainId);
+        if (list == null && !list.isEmpty()) return list.pollFirst();
         return -1;
     }
 
     @Override
     public int getRacNo(int trainId, int pId) {
         LinkedList<Integer> curList = racList.get(trainId);
-        for (int i=0; i<curList.size(); i++) {
-            if (curList.get(i) == pId) return i + 1;
-        }
-        return -1;
+        if (curList == null) return -1;
+        int idx = curList.indexOf(Integer.valueOf(pId));
+        return idx == -1 ? -1 : idx + 1;
     }
 
     @Override
     public int getWlNo(int trainId, int pId) {
         LinkedList<Integer> curList = wlList.get(trainId);
-        for (int i=0; i<curList.size(); i++) {
-            if (curList.get(i) == pId) return i + 1;
-        }
-        return -1;
+        if (curList == null) return -1;
+        int idx = curList.indexOf(Integer.valueOf(pId));
+        return idx == -1 ? -1 : idx + 1;
     }
 }
