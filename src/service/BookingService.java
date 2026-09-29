@@ -134,7 +134,6 @@ public class BookingService {
     }
     private String generatePNR() throws DataBaseException {
         pnr += bookingRepository.getTotalNoRows();
-        pnr++;
         return String.valueOf(pnr);
     }
 

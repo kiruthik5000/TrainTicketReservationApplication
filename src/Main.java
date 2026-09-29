@@ -15,7 +15,7 @@ public class Main {
         PassengerRepository passengerRepository = new DbPassengerRepository();
         SeatRepository seatRepository = new DbSeatRepository();
         TrainRepository trainRepository = new DbTrainRepository();
-        WaitingListRepository waitingListRepository = new InMemoryWaitingListRepository();
+        WaitingListRepository waitingListRepository = new DbWaitingListRepository();
 
         UserService userService = new UserService(userRepository);
         BookingService bookingService = new BookingService(trainRepository, seatRepository, bookingRepository, passengerRepository, waitingListRepository);

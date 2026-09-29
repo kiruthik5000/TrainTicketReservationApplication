@@ -6,10 +6,6 @@ import model.User;
 public class SessionStorage {
     private static User currentUser;
 
-    public static String getUserName() {
-        return currentUser.getUsername();
-    }
-
     public static boolean storeUser(User user) {
         if (currentUser != null) return false;
         currentUser = user;
@@ -26,9 +22,14 @@ public class SessionStorage {
         return currentUser;
     }
 
-    public static boolean userIsLogin() {
-        User currentUser = SessionStorage.getCurrentUser();
+    public static boolean userIsLoggedIn() {
+        User currentUser = getCurrentUser();
         if (currentUser == null) throw new UnAuthorizedAccessException("User must login to perform Operation");
         return true;
+    }
+
+    public static boolean isAdmin() {
+        User currentUser = getCurrentUser();
+        return currentUser.getEmail().equals("admin@gmail.com");
     }
 }

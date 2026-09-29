@@ -2,9 +2,11 @@ package ui;
 
 import dto.PassengerResponseDto;
 import exception.DataBaseException;
+import exception.UnAuthorizedAccessException;
 import model.Train;
 import service.AdminService;
 import utils.InputHandler;
+import utils.SessionStorage;
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ public class AdminUI {
     }
 
     public void showAllPassengersInTrain() throws DataBaseException {
+        if (!SessionStorage.isAdmin()) throw new UnAuthorizedAccessException("Admins can Only view this feature");
         List<Train> trainList = adminService.getAllTrains();
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1) +". "+ trainList.get(i));

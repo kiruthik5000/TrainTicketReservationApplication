@@ -21,7 +21,7 @@ public class BookingUi {
     }
 
     public void bookTickets() throws DataBaseException {
-        if (!SessionStorage.userIsLogin()) return;
+        if (!SessionStorage.userIsLoggedIn()) return;
         String from = InputHandler.getStringValue("Departure Station code");
         String to = InputHandler.getStringValue("Arrival Station code");
         System.out.println();
@@ -42,7 +42,7 @@ public class BookingUi {
     }
 
     public void showBookings() throws DataBaseException {
-        if(!SessionStorage.userIsLogin()) return;
+        if(!SessionStorage.userIsLoggedIn()) return;
         List<Booking> bookings = bookingService.getAllBookings();
         if (bookings == null || bookings.isEmpty()) throw new ItemNotFoundException("No bookings found for your account");
         for (int i=0; i<bookings.size(); i++) {
