@@ -67,7 +67,7 @@ public class MainMenuUi {
         try {
             userUi.login();
         } catch (Exception e) {
-            System.out.println("Error Occurred in login "+e.getClass().getSimpleName()+e.getMessage());
+            System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
         }
     }
 
@@ -75,7 +75,7 @@ public class MainMenuUi {
         try {
             userUi.register();
         } catch (Exception e) {
-            System.out.println("Error Occurred in register "+e.getClass().getSimpleName()+e.getMessage());
+            System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
         }
     }
 
@@ -83,7 +83,7 @@ public class MainMenuUi {
         try {
             bookingUi.bookTickets();
         } catch (Exception e) {
-            System.out.println("Error Occurred in booking "+e.getClass().getSimpleName()+e.getMessage());
+            System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ public class MainMenuUi {
         try {
             cancellationUi.cancelTickets();
         } catch (Exception e) {
-            System.out.println("Error Occurred in cancellation "+e.getClass().getSimpleName()+e.getMessage());
+            System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
             e.printStackTrace();
         }
     }
@@ -106,7 +106,7 @@ public class MainMenuUi {
                 return false;
             }
         } catch (Exception e) {
-            System.out.println("Error Occurred in Logout "+e.getClass().getSimpleName()+e.getMessage());
+            System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
         }
         return true;
     }
@@ -115,7 +115,7 @@ public class MainMenuUi {
         try {
             bookingUi.showBookings();
         } catch (Exception e) {
-            System.out.println("Error Occurred in Showing Booking "+e.getClass().getSimpleName()+e.getMessage());
+            System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
         }
     }
 
@@ -123,7 +123,7 @@ public class MainMenuUi {
         try {
             adminUI.showAllPassengersInTrain();
         } catch (Exception e) {
-            System.out.println("Error Occurred in Showing All passengers "+e.getClass().getSimpleName()+e.getMessage());
+            System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
         }
     }
 }

@@ -30,6 +30,7 @@ public class SessionStorage {
 
     public static boolean isAdmin() {
         User currentUser = getCurrentUser();
+        if (currentUser == null) throw new UnAuthorizedAccessException("User must login to perform Operation");
         return currentUser.getEmail().equals("admin@gmail.com");
     }
 }

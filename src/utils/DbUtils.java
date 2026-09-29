@@ -10,12 +10,12 @@ public class DbUtils {
         try {
             return DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/train", "root", "root");
         } catch (Exception e) {
-            System.out.println("Unexpected Error Occurs Cannot connect to the db"+e.getMessage());
+            System.out.println("Unexpected Error Occurs Cannot connect to the db "+e.getMessage());
         }
         return null;
     }
 
-    public static <T> void executeUpdateQuery(String q, List<T> objects) throws DataBaseException {
+    public static void executeUpdateQuery(String q, List<?> objects) throws DataBaseException {
         try (
                 Connection connection = getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(q)
@@ -25,11 +25,11 @@ public class DbUtils {
             }
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataBaseException("Error Occurred in update"+e.getMessage());
         }
     }
 
-    public static <T> void executeInsertQuery(String q, List<T> objects) throws DataBaseException {
+    public static  void executeInsertQuery(String q, List<?> objects) throws DataBaseException {
         try (
                 Connection connection = getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(q)
@@ -40,7 +40,7 @@ public class DbUtils {
             }
             preparedStatement.executeUpdate();
         } catch (Exception e) {
-            throw new DataBaseException(e.getMessage());
+            throw new DataBaseException("Error Occurred in Insert"+e.getMessage());
         }
     }
 }

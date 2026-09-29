@@ -14,12 +14,13 @@ public class InputHandler {
             System.out.println("Enter your "+label+":");
             try {
                 int value =  Integer.parseInt(s.nextLine());
-                if (value < 0 || value > limit) throw new InvalidInputException("Enter positive value");
+                if (value < 0) throw new InvalidInputException("Enter positive value");
+                if (value > limit) throw new InvalidInputException("Enter option within [1 - "+limit+"].");
                 return value;
             } catch (NumberFormatException e) {
-                System.out.println("Enter numeric Input"+e.getMessage());
+                System.out.println("Enter numeric Input "+e.getMessage());
             } catch (Exception e) {
-                System.out.println("Unexpected Error Occurred"+e.getMessage());
+                System.out.println("Unexpected Error Occurred "+e.getMessage());
             }
         }
     }

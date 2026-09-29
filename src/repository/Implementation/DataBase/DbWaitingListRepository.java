@@ -1,18 +1,23 @@
 package repository.Implementation.DataBase;
 
 import exception.DataBaseException;
+import model.Passenger;
+import model.PassengerStatus;
 import repository.WaitingListRepository;
 import utils.DbUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class DbWaitingListRepository implements WaitingListRepository {
     public int racLimit = 2;
     public int wlLimit = 2;
-    @Override
+
+
     public int getRACAvailabilityNo(int trainId) throws DataBaseException {
         String query = "SELECT count(*) as cnt\n" +
                 "from passenger a\n" +
@@ -34,8 +39,7 @@ public class DbWaitingListRepository implements WaitingListRepository {
         }
     }
 
-    @Override
-    public int getWLNAvailability(int trainId) throws DataBaseException {
+    public int getWLNAvailabilityNo(int trainId) throws DataBaseException {
         String query = "SELECT count(*) as cnt\n" +
                 "from passenger a\n" +
                 "join booking b\n" +
@@ -57,12 +61,12 @@ public class DbWaitingListRepository implements WaitingListRepository {
     }
 
     @Override
-    public void addRac(int trainId, int passengerId) {
+    public void addAllRac(int trainId, List<Passenger> passengers) {
 
     }
 
     @Override
-    public void addWl(int trainId, int passengerId) {
+    public void addAllWl(int trainId, List<Passenger> passengers) {
 
     }
 
@@ -75,68 +79,82 @@ public class DbWaitingListRepository implements WaitingListRepository {
 
     @Override
     public int getAvailableWl(int trainId) throws DataBaseException {
-        int curRac = getWLNAvailability(trainId);
+        int curRac = getWLNAvailabilityNo(trainId);
 //        System.out.println("Available WL"+curRac);
         return Math.max(0, wlLimit - curRac);
     }
 
     @Override
-    public void removeRacPassenger(int pId, int trainId) {
+    public void removeAllRacPassenger(List<Integer> pId, int trainId) {
 
     }
 
     @Override
-    public void removeWlPassenger(int pId, int trainId) {
+    public void removeAllWlPassenger(List<Integer> pId, int trainId) {
 
     }
 
     @Override
-    public int getFirstRacPassenger(int trainId) throws DataBaseException {
+    public List<Passenger> getRacPassengers(int trainId, int limit) throws DataBaseException {
         String query = "SELECT a.passengerId as pId, row_number() over() as roll\n" +
                 "from passenger a\n" +
                 "join booking b\n" +
                 "on a.pnr = b.pnr\n" +
                 "WHERE a.status = 'RAC' and b.trainId = ?\n" +
                 "ORDER BY a.passengerId "+
-                "LIMIT 1;";
+                "LIMIT ?;";
         try (
                 Connection connection = DbUtils.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query);
         ) {
             preparedStatement.setObject(1, trainId);
+            preparedStatement.setObject(2, limit);
             ResultSet rs = preparedStatement.executeQuery();
-            if (rs.next()) {
-                int curCnt = rs.getInt("pId");
-                if (curCnt == 0) return -1;
-                return curCnt;
+            List<Passenger> passengers = new ArrayList<>();
+            while (rs.next()) {
+                passengers.add(new Passenger(
+                        rs.getInt("passengerId"),
+                        rs.getString("name"),
+                        rs.getInt("age"),
+                        PassengerStatus.valueOf(rs.getString("status")),
+                        rs.getString("pnr"),
+                        rs.getInt("seatId")
+                ));
             }
-            return -1;
+            return passengers;
         } catch (Exception e) {
             throw new DataBaseException(e.getMessage());
         }
     }
 
     @Override
-    public int getFirstWlPassenger(int trainId) throws DataBaseException {
+    public List<Passenger> getWlPassengers(int trainId, int limit) throws DataBaseException {
         String query = "SELECT a.passengerId as pId, row_number() over() as roll\n" +
                 "from passenger a\n" +
                 "join booking b\n" +
                 "on a.pnr = b.pnr\n" +
                 "WHERE a.status = 'WL' and b.trainId = ?\n" +
                 "ORDER BY a.passengerId "+
-                "LIMIT 1;";
+                "LIMIT ?;";
         try (
                 Connection connection = DbUtils.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query);
         ) {
             preparedStatement.setObject(1, trainId);
+            preparedStatement.setObject(2, limit);
             ResultSet rs = preparedStatement.executeQuery();
-            if (rs.next()) {
-                int curCnt = rs.getInt("pId");
-                if (curCnt == 0) return -1;
-                return curCnt;
+            List<Passenger> passengers = new ArrayList<>();
+            while (rs.next()) {
+                passengers.add(new Passenger(
+                        rs.getInt("passengerId"),
+                        rs.getString("name"),
+                        rs.getInt("age"),
+                        PassengerStatus.valueOf(rs.getString("status")),
+                        rs.getString("pnr"),
+                        rs.getInt("seatId")
+                ));
             }
-            return -1;
+            return passengers;
         } catch (Exception e) {
             throw new DataBaseException(e.getMessage());
         }

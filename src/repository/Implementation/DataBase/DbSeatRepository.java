@@ -78,16 +78,20 @@ public class DbSeatRepository implements SeatRepository {
     }
 
     @Override
-    public void updateAllSeatStatus(String[] seatIds, SeatStatus status) {
-        String query = "UPDATE seat SET status = ? WHERE seatId IN (%s);".formatted(String.join(", ", seatIds));
-        System.out.println("final Query " + query);
+    public void updateAllSeatStatus(List<Integer> seatIds, SeatStatus status) {
+        String query = "UPDATE seat SET status = ? WHERE seatId = ?;";
 
         try (
                 Connection connection = DbUtils.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)
         ) {
-            preparedStatement.setObject(1, status.name());
-            preparedStatement.executeUpdate();
+            for (int i : seatIds) {
+                preparedStatement.setObject(1, status.name());
+                preparedStatement.setObject(2, i);
+
+                preparedStatement.addBatch();
+            }
+            preparedStatement.executeBatch();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

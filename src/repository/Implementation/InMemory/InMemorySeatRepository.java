@@ -38,10 +38,9 @@ public class InMemorySeatRepository implements SeatRepository {
     }
 
     @Override
-    public void updateAllSeatStatus(String[] seatIds, SeatStatus status) {
-        for (String s : seatIds) {
-            int sId = Integer.parseInt(s);
-            seatMap.get(sId).setStatus(status);
+    public void updateAllSeatStatus(List<Integer> seatIds, SeatStatus status) {
+        for (int s : seatIds) {
+            seatMap.get(s).setStatus(status);
         }
     }
 }

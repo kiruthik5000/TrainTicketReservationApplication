@@ -1,18 +1,24 @@
 package repository;
 
 import exception.DataBaseException;
+import model.Passenger;
+
+import java.util.List;
 
 public interface WaitingListRepository {
-    int getRACAvailabilityNo(int trainId) throws DataBaseException;
-    int getWLNAvailability(int trainId) throws DataBaseException;
-    void addRac(int trainId, int passengerId);
-    void addWl(int trainId, int passengerId);
+
+    void addAllRac(int trainId, List<Passenger> passengers);
+    void addAllWl(int trainId, List<Passenger> passengers);
+
     int getAvailableRac(int trainId) throws DataBaseException;
     int getAvailableWl(int trainId) throws DataBaseException;
-    void removeRacPassenger(int pId, int trainId);
-    void removeWlPassenger(int pId, int trainId);
-    int getFirstRacPassenger(int trainId) throws DataBaseException;
-    int getFirstWlPassenger(int trainId) throws DataBaseException;
+
+    void removeAllRacPassenger(List<Integer> pIds, int trainId);
+    void removeAllWlPassenger(List<Integer> pIds, int trainId);
+
+    List<Passenger> getRacPassengers(int trainId, int limit) throws DataBaseException;
+    List<Passenger> getWlPassengers(int trainId, int limit) throws DataBaseException;
+
     int getRacNo(int trainId, int pId) throws DataBaseException;
     int getWlNo(int trainId, int pId) throws DataBaseException;
 }

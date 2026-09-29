@@ -21,27 +21,40 @@ public class BookingUi {
         this.bookingService = bookingService;
     }
 
-    public void bookTickets() throws DataBaseException {
+    public void bookTickets() throws Exception {
         if (!SessionStorage.userIsLoggedIn()) return;
         String from = InputHandler.getStringValue("Departure Station code");
         String to = InputHandler.getStringValue("Arrival Station code");
         System.out.println();
+
         List<Train> trainList = bookingService.getAllTrains();
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1)+". "+trainList.get(i));
         }
+
         System.out.println();
         int choice = InputHandler.getNumericValue("Train Index", trainList.size());
         Train selectedTrain = trainList.get(choice - 1);
-        System.out.println("------------------------");
-        System.out.println(selectedTrain);
+
         String seatNo = bookingService.getAvailableSeats(selectedTrain.getTrainId());
         if (seatNo.equals("Regret No More booking")) throw new SeatNotFoundException("Regret No More booking");
-        System.out.println("Seats: "+seatNo);
-        List<PassengerRequestDto> passengersList = gatherPassengers();
-        System.out.println("Selected "+passengersList.size()+" of Passengers");
-        BookingResponseDto responseDto = bookingService.bookTickets(selectedTrain.getTrainId(), from, to, passengersList);
-        System.out.println(responseDto);
+
+        while (true) {
+            try {
+                System.out.println("------------------------");
+                System.out.println(selectedTrain);
+                System.out.println("Seats: "+seatNo);
+
+                List<PassengerRequestDto> passengersList = gatherPassengers();
+
+                System.out.println("Selected " + passengersList.size() + " Passengers");
+                BookingResponseDto responseDto = bookingService.bookTickets(selectedTrain.getTrainId(), from, to, passengersList);
+                System.out.println(responseDto);
+                break;
+            }catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 
     public void showBookings() throws DataBaseException {
@@ -70,8 +83,10 @@ public class BookingUi {
                 String name = InputHandler.getStringValue("name");
                 int age = InputHandler.getNumericValue("age", 100);
                 passengerList.add(new PassengerRequestDto(name, age));
-            } else break;
+            }
+            if (choice == 2) return passengerList;
         }
+        System.out.println("Only 6 passengers can book in 1 Booking");
         return passengerList;
     }
 }

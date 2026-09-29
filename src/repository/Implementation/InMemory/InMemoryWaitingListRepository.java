@@ -1,16 +1,16 @@
 package repository.Implementation.InMemory;
 
+import exception.InvalidInputException;
+import model.Passenger;
 import repository.WaitingListRepository;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryWaitingListRepository implements WaitingListRepository {
     public int racLimit = 2;
     public int wlLimit = 2;
-    private final Map<Integer, LinkedList<Integer>> racList; // 2 position
-    private final Map<Integer, LinkedList<Integer>> wlList; // 2 position
+    private final Map<Integer, LinkedList<Passenger>> racList; // 2 position
+    private final Map<Integer, LinkedList<Passenger>> wlList; // 2 position
 
     public InMemoryWaitingListRepository() {
         racList = new HashMap<>();
@@ -19,27 +19,34 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
         wlList.put(1, new LinkedList<>());
     }
 
+    public void addRac(int trainId, Passenger passenger) {
+        LinkedList<Passenger> curList = racList.getOrDefault(trainId, new LinkedList<>());
+        if (curList.size() >= racLimit) throw new InvalidInputException("RAC is Full");
+        curList.offerLast(passenger);
+    }
 
-    @Override
-    public int getRACAvailabilityNo(int trainId) {
-        return racList.getOrDefault(trainId, new LinkedList<>()).size();
+    public void addWl(int trainId, Passenger passenger) {
+       LinkedList<Passenger> curList = wlList.getOrDefault(trainId, new LinkedList<>());
+       if (curList.size() >= wlLimit) throw new InvalidInputException("WL is Full");
+       curList.offerLast(passenger);
     }
 
     @Override
-    public int getWLNAvailability(int trainId) {
-        return wlList.getOrDefault(trainId, new LinkedList<>()).size();
+    public void addAllRac(int trainId, List<Passenger> passengers) {
+        LinkedList<Passenger> curList = racList.getOrDefault(trainId, new LinkedList<>());
+        for (Passenger p : passengers) {
+            if (curList.size() >= racLimit) break;
+            curList.add(p);
+        }
     }
 
     @Override
-    public void addRac(int trainId, int passengerId) {
-        racList.putIfAbsent(trainId, new LinkedList<>());
-        racList.get(trainId).add(passengerId);
-    }
-
-    @Override
-    public void addWl(int trainId, int passengerId) {
-        wlList.put(trainId, new LinkedList<>());
-        wlList.get(trainId).add(passengerId);
+    public void addAllWl(int trainId, List<Passenger> passengers) {
+        LinkedList<Passenger> curList = wlList.getOrDefault(trainId, new LinkedList<>());
+        for (Passenger p : passengers) {
+            if (curList.size() >= wlLimit) break;
+            curList.add(p);
+        }
     }
 
     @Override
@@ -53,46 +60,55 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
     }
 
     @Override
-    public void removeRacPassenger(int pId, int trainId) {
+    public void removeAllRacPassenger(List<Integer> pIds, int trainId) {
         if (racList.containsKey(trainId)) {
-            racList.get(trainId).remove(Integer.valueOf(pId));
+            for (int pId : pIds) {
+                racList.get(trainId).removeIf(k -> k.getPassengerId() == pId);
+            }
         }
     }
 
     @Override
-    public void removeWlPassenger(int pId, int trainId) {
+    public void removeAllWlPassenger(List<Integer> pIds, int trainId) {
         if (wlList.containsKey(trainId)) {
-            wlList.get(trainId).remove(Integer.valueOf(pId));
+            for (int pId : pIds) {
+                wlList.get(trainId).removeIf(k -> k.getPassengerId() == pId);
+            }
         }
     }
 
     @Override
-    public int getFirstRacPassenger(int trainId) {
-        LinkedList<Integer> list = racList.get(trainId);
-        if (list == null && !list.isEmpty()) return list.pollFirst();
-        return -1;
+    public List<Passenger> getRacPassengers(int trainId, int limit) {
+        LinkedList<Passenger> list = racList.getOrDefault(trainId, new LinkedList<>());
+        if (list == null || list.isEmpty()) return new ArrayList<>();
+        return new ArrayList<>(list.subList(0, Math.min(limit, list.size())));
     }
 
     @Override
-    public int getFirstWlPassenger(int trainId) {
-        LinkedList<Integer> list = wlList.get(trainId);
-        if (list == null && !list.isEmpty()) return list.pollFirst();
-        return -1;
+    public List<Passenger> getWlPassengers (int trainId, int limit) {
+        LinkedList<Passenger> list = wlList.getOrDefault(trainId, new LinkedList<>());
+        if (list == null || list.isEmpty()) return new ArrayList<>();
+        return new ArrayList<>(list.subList(0, Math.min(limit, list.size())));
     }
 
     @Override
     public int getRacNo(int trainId, int pId) {
-        LinkedList<Integer> curList = racList.get(trainId);
-        if (curList == null) return -1;
-        int idx = curList.indexOf(Integer.valueOf(pId));
-        return idx == -1 ? -1 : idx + 1;
+        return getSequenceNo(trainId, pId, racList);
     }
 
     @Override
     public int getWlNo(int trainId, int pId) {
-        LinkedList<Integer> curList = wlList.get(trainId);
+        return getSequenceNo(trainId, pId, wlList);
+    }
+
+    private int getSequenceNo(int trainId, int pId, Map<Integer, LinkedList<Passenger>> wlList) {
+        LinkedList<Passenger> curList = wlList.get(trainId);
         if (curList == null) return -1;
-        int idx = curList.indexOf(Integer.valueOf(pId));
-        return idx == -1 ? -1 : idx + 1;
+        for (int i = 0; i < curList.size(); i++) {
+            if (curList.get(i).getPassengerId() == pId) {
+                return i + 1;
+            }
+        }
+        return -1;
     }
 }

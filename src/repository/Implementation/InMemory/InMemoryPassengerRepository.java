@@ -1,5 +1,7 @@
 package repository.Implementation.InMemory;
 
+import dto.PassengerSeatIdDto;
+import exception.DataBaseException;
 import model.Passenger;
 import model.PassengerStatus;
 import repository.PassengerRepository;
@@ -37,6 +39,23 @@ public class InMemoryPassengerRepository implements PassengerRepository {
             Passenger curPassenger = passengerMap.get(id);
             curPassenger.setStatus(status);
             curPassenger.setSeatId(seatId);
+        }
+    }
+
+    @Override
+    public void addAllPassenger(List<Passenger> passengers) throws DataBaseException {
+        for (Passenger p : passengers) {
+            p.setPassengerId(++nextPassengerId);
+            passengerMap.put(nextPassengerId, p);
+        }
+    }
+
+    @Override
+    public void updateAllPassengerStatusAndSeatNo(List<PassengerSeatIdDto> passengerSeatIdDtos, PassengerStatus status) {
+        for (PassengerSeatIdDto dto : passengerSeatIdDtos) {
+            Passenger curPassenger = passengerMap.get(dto.getPassengerId());
+            curPassenger.setStatus(status);
+            curPassenger.setSeatId(dto.getSeatId());
         }
     }
 }
