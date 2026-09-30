@@ -65,39 +65,59 @@ public class CancellationService {
     private void promoteWlListToCnf(int trainId) throws DataBaseException {
         List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId);
 
-        if (availableSeats.isEmpty()) return;
-        List<Passenger> racPassengers = waitingListRepository.getRacPassengers(trainId, availableSeats.size());
+        int availableSeatCnt = availableSeats.size();
+        if (availableSeatCnt > 0) {
+            List<Passenger> racPassengers = waitingListRepository.getRacPassengers(trainId, availableSeats.size());
 
-        List<Integer> seatIds = new ArrayList<>();
+            List<Integer> seatIds = new ArrayList<>();
 
-        int racToCnfSeats = Math.min(availableSeats.size(), racPassengers.size());
-        List<PassengerSeatIdDto> cnfDtos = new ArrayList<>();
+            int racToCnfSeats = Math.min(availableSeatCnt, racPassengers.size());
+            List<PassengerSeatIdDto> cnfDtos = new ArrayList<>();
 
-        for (int i=0; i<racToCnfSeats; i++) {
-            Seat curSeat = availableSeats.get(i);
-            Passenger curPassenger = racPassengers.get(i);
-            cnfDtos.add(new PassengerSeatIdDto(
-                    curPassenger.getPassengerId(),
-                    curSeat.getSeatId()
-            ));
-            seatIds.add(curSeat.getSeatId());
-        }
+            List<Integer> racRemove = new ArrayList<>();
+            List<Integer> wlRemove = new ArrayList<>();
 
-        if (racToCnfSeats < availableSeats.size()) {
-            List<Passenger> wlPassengers = waitingListRepository.getWlPassengers(trainId, (availableSeats.size() - racToCnfSeats));
-
-            for (int i=0; i<wlPassengers.size(); i++) {
-                Seat curSeat = availableSeats.get(racToCnfSeats + i);
-                Passenger curPassenger = wlPassengers.get(i);
+            for (int i = 0; i < racToCnfSeats; i++) {
+                Seat curSeat = availableSeats.get(i);
+                Passenger curPassenger = racPassengers.get(i);
+                racRemove.add(curPassenger.getPassengerId());
                 cnfDtos.add(new PassengerSeatIdDto(
                         curPassenger.getPassengerId(),
                         curSeat.getSeatId()
                 ));
                 seatIds.add(curSeat.getSeatId());
             }
-        }
-        seatRepository.updateAllSeatStatus(seatIds, SeatStatus.BOOKED);
-        passengerRepository.updateAllPassengerStatusAndSeatNo(cnfDtos, PassengerStatus.CNF);
+
+            int remainingSeats = availableSeatCnt - racToCnfSeats;
+            if (remainingSeats > 0) {
+                List<Passenger> wlPassengers = waitingListRepository.getWlPassengers(trainId, (availableSeats.size() - racToCnfSeats));
+
+                for (int i = 0; i < wlPassengers.size(); i++) {
+                    Seat curSeat = availableSeats.get(racToCnfSeats + i);
+                    Passenger curPassenger = wlPassengers.get(i);
+                    wlRemove.add(curPassenger.getPassengerId());
+                    cnfDtos.add(new PassengerSeatIdDto(
+                            curPassenger.getPassengerId(),
+                            curSeat.getSeatId()
+                    ));
+                    seatIds.add(curSeat.getSeatId());
+                }
+            }
+
+            if (!racRemove.isEmpty()) {
+                waitingListRepository.removeAllWlPassenger(racRemove, trainId);
+            }
+
+            if (!wlRemove.isEmpty()) {
+                waitingListRepository.removeAllWlPassenger(wlRemove, trainId);
+            }
+            if (!seatIds.isEmpty()) {
+                seatRepository.updateAllSeatStatus(seatIds, SeatStatus.BOOKED);
+            }
+
+            if (!cnfDtos.isEmpty()) {
+                passengerRepository.updateAllPassengerStatusAndSeatNo(cnfDtos, PassengerStatus.CNF);
+            }
 //        for (Seat s : availableSeats) {
 //            int racPassengerId = waitingListRepository.getFirstRacPassenger(trainId);
 //            if (racPassengerId != -1) {
@@ -113,6 +133,7 @@ public class CancellationService {
 //            }
 //            break;
 //        }
+        }
         promoteWlToRac(trainId);
      }
 

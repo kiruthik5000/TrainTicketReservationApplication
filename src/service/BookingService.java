@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookingService {
-    private long pnr = 4000000000L;
+
     private final TrainRepository trainRepository;
     private final SeatRepository seatRepository;
     private final BookingRepository bookingRepository;
@@ -53,8 +53,10 @@ public class BookingService {
         int totalPassengers = passengers.size();
         int cnfAvail = availableSeats.size();
         int cnfCnt = Math.min(cnfAvail, totalPassengers);
+
         int racAvail = waitingListRepository.getAvailableRac(trainId);
         int wlAvail = waitingListRepository.getAvailableWl(trainId);
+
         int currentCanBook = cnfAvail + racAvail + wlAvail;
         if (passengers.size() > currentCanBook) throw new SeatNotFoundException("Only "+currentCanBook+" Seats left please Enter "+currentCanBook+" passengers.");
 
@@ -69,8 +71,8 @@ public class BookingService {
              PassengerRequestDto curPassenger = passengers.get(i);
              Seat curSeat = availableSeats.get(i);
 //             seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
-            cnfSeatIds.add(curSeat.getSeatId());
              Passenger cnfPassenger = new Passenger(0, curPassenger.getName(), curPassenger.getAge(), PassengerStatus.CNF, pnr, curSeat.getSeatId());
+             cnfSeatIds.add(curSeat.getSeatId());
 //             passengerRepository.addPassenger(cnfPassenger);
              selectedPassengers.add(cnfPassenger);
          }
@@ -78,12 +80,21 @@ public class BookingService {
             seatRepository.updateAllSeatStatus(cnfSeatIds, SeatStatus.BOOKED);
         }
          if (cnfAvail < totalPassengers) {
-             List<Passenger> wlPassengers = updateWaitingQueue(cnfCnt, passengers, trainId, pnr, racAvail, wlAvail);
+             List<Passenger> wlPassengers = updateWaitingQueue(cnfCnt, passengers, pnr, racAvail, wlAvail);
              selectedPassengers.addAll(wlPassengers);
          }
-
         if (!selectedPassengers.isEmpty()) {
             passengerRepository.addAllPassenger(selectedPassengers);
+        }
+
+        List<Passenger> racPassengers = selectedPassengers.stream().filter(k->k.getStatus() == PassengerStatus.RAC).toList();
+        List<Passenger> wlPassengers = selectedPassengers.stream().filter(k->k.getStatus() == PassengerStatus.WL).toList();
+
+        if (!racPassengers.isEmpty()) {
+            waitingListRepository.addAllRac(trainId, racPassengers);
+        }
+        if (!wlPassengers.isEmpty()) {
+            waitingListRepository.addAllWl(trainId, wlPassengers);
         }
 
          List<PassengerResponseDto> addedPassengers = gatherPassengerDetails(pnr, trainId);
@@ -103,7 +114,7 @@ public class BookingService {
         return new BookingResponseDto(pnr, curBooking.getFrom(), curBooking.getTo(), curTrain, curPassengers.size(), curPassengers, curBooking.getStatus());
     }
 
-    private List<Passenger> updateWaitingQueue(int index, List<PassengerRequestDto> passengers, int trainId, String pnr, int racAvail, int wlAvail) {
+    private List<Passenger> updateWaitingQueue(int index, List<PassengerRequestDto> passengers, String pnr, int racAvail, int wlAvail) {
 
         List<Passenger> waitingPassengers = new ArrayList<>();
 
@@ -111,12 +122,12 @@ public class BookingService {
             PassengerRequestDto curPassengerReq = passengers.get(i);
             Passenger curPassenger;
             if (racAvail > 0) {
-                curPassenger = new Passenger(0, curPassengerReq.getName(), curPassengerReq.getAge(), PassengerStatus.RAC, pnr,-1);
+                curPassenger = new Passenger(0, curPassengerReq.getName(), curPassengerReq.getAge(), PassengerStatus.RAC, pnr, -1);
 //                curPassenger = passengerRepository.addPassenger(curPassenger);
                 waitingPassengers.add(curPassenger);
 //                waitingListRepository.addRac(trainId, curPassenger);
                 racAvail--;
-            } else if(wlAvail > 0) {
+            } else if (wlAvail > 0) {
                 curPassenger = new Passenger(0, curPassengerReq.getName(), curPassengerReq.getAge(), PassengerStatus.WL, pnr, -1);
 //                curPassenger = passengerRepository.addPassenger(curPassenger);
                 waitingPassengers.add(curPassenger);
@@ -125,15 +136,6 @@ public class BookingService {
             } else {
                 throw new SeatNotFoundException("Unexpected Error Occurs");
             }
-        }
-        List<Passenger> racPassengers = waitingPassengers.stream().filter(k->k.getStatus() == PassengerStatus.RAC).toList();
-        List<Passenger> wlPassengers = waitingPassengers.stream().filter(k->k.getStatus() == PassengerStatus.WL).toList();
-
-        if (!racPassengers.isEmpty()) {
-            waitingListRepository.addAllRac(trainId, racPassengers);
-        }
-        if (!wlPassengers.isEmpty()) {
-            waitingListRepository.addAllWl(trainId, wlPassengers);
         }
 
        return waitingPassengers;
@@ -160,11 +162,13 @@ public class BookingService {
         return passengerResponseDtos;
     }
     private String generatePNR() throws DataBaseException {
-        pnr += bookingRepository.getTotalNoRows();
+        long pnr = bookingRepository.getTotalNoRows() + 4000000000L;
         return String.valueOf(pnr);
     }
 
     public List<Booking> getActiveBookings() throws DataBaseException {
-        return bookingRepository.getActiveBookings(SessionStorage.getCurrentUser().getUserId());
+        List<Booking> bookingList =  bookingRepository.getActiveBookings(SessionStorage.getCurrentUser().getUserId());
+        if (bookingList.isEmpty()) throw new DataBaseException("No Active Bookings Found");
+        return bookingList;
     }
 }

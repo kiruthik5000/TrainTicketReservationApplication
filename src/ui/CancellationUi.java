@@ -26,6 +26,7 @@ public class CancellationUi {
     public void cancelTickets() throws DataBaseException {
         if (!SessionStorage.userIsLoggedIn()) return;
         List<Booking> bookingList = bookingService.getActiveBookings();
+
         for (int i=0; i<bookingList.size(); i++) {
             Booking curBooking = bookingList.get(i);
             if (curBooking.getStatus().equals(BookingStatus.ACTIVE)) {

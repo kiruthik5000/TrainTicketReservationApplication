@@ -96,7 +96,7 @@ public class DbWaitingListRepository implements WaitingListRepository {
 
     @Override
     public List<Passenger> getRacPassengers(int trainId, int limit) throws DataBaseException {
-        String query = "SELECT a.passengerId as pId, row_number() over() as roll\n" +
+        String query = "SELECT a.passengerId, a.name, a.age, a.status, a.pnr, a.seatId " +
                 "from passenger a\n" +
                 "join booking b\n" +
                 "on a.pnr = b.pnr\n" +
@@ -129,7 +129,7 @@ public class DbWaitingListRepository implements WaitingListRepository {
 
     @Override
     public List<Passenger> getWlPassengers(int trainId, int limit) throws DataBaseException {
-        String query = "SELECT a.passengerId as pId, row_number() over() as roll\n" +
+        String query = "SELECT a.passengerId, a.name, a.age, a.status, a.pnr, a.seatId\n" +
                 "from passenger a\n" +
                 "join booking b\n" +
                 "on a.pnr = b.pnr\n" +

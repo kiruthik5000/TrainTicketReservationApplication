@@ -47,6 +47,8 @@ public class BookingUi {
 
                 List<PassengerRequestDto> passengersList = gatherPassengers();
 
+                if (passengersList == null || passengersList.isEmpty()) return;
+
                 System.out.println("Selected " + passengersList.size() + " Passengers");
                 BookingResponseDto responseDto = bookingService.bookTickets(selectedTrain.getTrainId(), from, to, passengersList);
                 System.out.println(responseDto);
@@ -76,15 +78,17 @@ public class BookingUi {
         int i = 6;
         while (i -- > 0) {
             System.out.println("1. Add new passenger");
-            System.out.println("2. return");
+            System.out.println("2. Submit");
+            System.out.println("3. Back to Main Menu");
 
-            int choice = InputHandler.getNumericValue("choice", 2);
+            int choice = InputHandler.getNumericValue("choice", 3);
             if (choice == 1) {
                 String name = InputHandler.getStringValue("name");
                 int age = InputHandler.getNumericValue("age", 100);
                 passengerList.add(new PassengerRequestDto(name, age));
             }
             if (choice == 2) return passengerList;
+            if (choice == 3) return null;
         }
         System.out.println("Only 6 passengers can book in 1 Booking");
         return passengerList;
