@@ -18,6 +18,7 @@ public class InMemoryBookingRepository implements BookingRepository {
         bookingMap.put(1, new Booking(1, "123456789", "CBE", "TBM", 1, 1, BookingStatus.ACTIVE));
     }
 
+
     @Override
     public List<Booking> getBookingByUser(int userId) {
         return bookingMap

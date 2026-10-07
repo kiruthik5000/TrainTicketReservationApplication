@@ -4,8 +4,8 @@ import dto.BookingResponseDto;
 import dto.PassengerResponseDto;
 import exception.DataBaseException;
 import exception.InvalidInputException;
+import exception.ItemNotFoundException;
 import model.Booking;
-import model.BookingStatus;
 import service.BookingService;
 import service.CancellationService;
 import utils.InputHandler;
@@ -24,15 +24,15 @@ public class CancellationUi {
     }
 
     public void cancelTickets() throws DataBaseException {
-        if (!SessionStorage.userIsLoggedIn()) return;
+        SessionStorage.userIsLoggedIn();
         List<Booking> bookingList = bookingService.getActiveBookings();
 
+        if (bookingList == null || bookingList.isEmpty()) throw new ItemNotFoundException("No Active Bookings Found");
         for (int i=0; i<bookingList.size(); i++) {
             Booking curBooking = bookingList.get(i);
-            if (curBooking.getStatus().equals(BookingStatus.ACTIVE)) {
-                System.out.println((i + 1) + ". pnr: " + curBooking.getPnr() + "\t" + curBooking.getFrom() + " - " + curBooking.getTo() + "\t" + curBooking.getStatus());
-            }
+            System.out.println((i + 1) + ". pnr: " + curBooking.getPnr() + "\t" + curBooking.getFrom() + " - " + curBooking.getTo() + "\t" + curBooking.getStatus());
         }
+
         int choice = InputHandler.getNumericValue("Choice of Booking", bookingList.size());
         Booking selectedBooking = bookingList.get(choice - 1);
         BookingResponseDto dto = bookingService.getBookingDetails(selectedBooking.getPnr());
@@ -45,12 +45,11 @@ public class CancellationUi {
         choice = InputHandler.getNumericValue("Choice", 3);
         if (choice == 1) {
             if (cancellationService.cancelFullBooking(selectedBooking.getPnr())) {
-            System.out.println("Booking cancelled successfully.");
-        } else {
-            System.out.println("Unexpected Error in cancellation.");
-        }
-        }
-        if (choice == 2) {
+                System.out.println("Booking cancelled successfully.");
+            } else {
+                System.out.println("Unexpected Error in cancellation.");
+            }
+        } else if (choice == 2) {
             Set<Integer> selectedPassengers = gatherPassengersNeedToRemove(selectedBooking.getPnr(), selectedBooking.getTrainId());
 
             if (selectedPassengers.isEmpty()) {
@@ -90,7 +89,7 @@ public class CancellationUi {
         for (String v : indexes) {
             try {
                 int index = Integer.parseInt(v.trim());
-                if (index < 1 || index > limit) throw new InvalidInputException("Invalid Passenger Index");
+                    if (index < 1 || index > limit) throw new InvalidInputException("Invalid Passenger Index");
                 PassengerResponseDto selectedPassenger = dtos.get(index - 1);
                 if (selectedPassenger != null) {
                     selected.add(selectedPassenger.getpId());

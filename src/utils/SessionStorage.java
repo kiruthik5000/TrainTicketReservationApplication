@@ -12,10 +12,9 @@ public class SessionStorage {
         return true;
     }
 
-    public static boolean removeUser() {
-        if (currentUser == null) return false;
+    public static void removeUser() {
+        if (currentUser == null) return;
         currentUser = null;
-        return true;
     }
 
     public static User getCurrentUser() {

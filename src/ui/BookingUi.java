@@ -3,6 +3,7 @@ package ui;
 import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
 import exception.DataBaseException;
+import exception.InvalidInputException;
 import exception.ItemNotFoundException;
 import exception.SeatNotFoundException;
 import model.Booking;
@@ -28,6 +29,9 @@ public class BookingUi {
         System.out.println();
 
         List<Train> trainList = bookingService.getAllTrains();
+
+        if (trainList == null || trainList.isEmpty()) throw new ItemNotFoundException("No trains found for this schedule");
+
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1)+". "+trainList.get(i));
         }
@@ -50,10 +54,13 @@ public class BookingUi {
                 if (passengersList == null || passengersList.isEmpty()) return;
 
                 System.out.println("Selected " + passengersList.size() + " Passengers");
+                for (PassengerRequestDto p : passengersList) {
+                    System.out.println(p);
+                }
                 BookingResponseDto responseDto = bookingService.bookTickets(selectedTrain.getTrainId(), from, to, passengersList);
                 System.out.println(responseDto);
                 break;
-            }catch (Exception e) {
+            }catch (InvalidInputException | SeatNotFoundException e) {
                 System.out.println(e.getMessage());
             }
         }
@@ -75,8 +82,10 @@ public class BookingUi {
 
     private List<PassengerRequestDto> gatherPassengers() {
         List<PassengerRequestDto> passengerList = new ArrayList<>();
-        int i = 6;
-        while (i -- > 0) {
+
+        System.out.println("Enter Passenger details (upto 6)");
+
+        while (passengerList.size() < 6) {
             System.out.println("1. Add new passenger");
             System.out.println("2. Submit");
             System.out.println("3. Back to Main Menu");
@@ -87,7 +96,13 @@ public class BookingUi {
                 int age = InputHandler.getNumericValue("age", 100);
                 passengerList.add(new PassengerRequestDto(name, age));
             }
-            if (choice == 2) return passengerList;
+            if (choice == 2) {
+                if (passengerList.isEmpty()) {
+                    System.out.println("Add at least one passenger.");
+                    continue;
+                }
+                return passengerList;
+            }
             if (choice == 3) return null;
         }
         System.out.println("Only 6 passengers can book in 1 Booking");
