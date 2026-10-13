@@ -24,10 +24,29 @@ public class AdminUI {
             System.out.println((i + 1) +". "+ trainList.get(i));
         }
         int choice = InputHandler.getNumericValue("Train Index", trainList.size());
-        List<PassengerResponseDto> passengerResponseDtos = adminService.showAllPassengersInTrain(trainList.get(choice - 1).getTrainId());
-        System.out.println("Passengers: ");
-        for (PassengerResponseDto p : passengerResponseDtos) {
-            System.out.println(p);
+        printPassengerValues(trainList.get(choice - 1).getTrainId());
+    }
+    public void printPassengerValues(int trainID) throws DataBaseException {
+        int curWindow = 0;
+        while (true) {
+            List<PassengerResponseDto> passengerResponseDtos = adminService.showAllPassengersInTrain(trainID, curWindow);
+            if (passengerResponseDtos == null) {
+                System.out.println("End of passenger list");
+                return;
+            }
+            System.out.println("Passengers: ");
+            for (PassengerResponseDto p : passengerResponseDtos) {
+                System.out.println(p);
+            }
+            System.out.println("1. show next passengers");
+            System.out.println("2. return");
+
+            int choice = InputHandler.getNumericValue("choice", 2);
+            if (choice == 1) {
+                curWindow ++;
+            } else {
+                return;
+            }
         }
     }
 }

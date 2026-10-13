@@ -6,6 +6,7 @@ import model.*;
 import repository.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class AdminService {
@@ -28,7 +29,7 @@ public class AdminService {
         return trainRepository.getAllTrains();
     }
 
-    public List<PassengerResponseDto> showAllPassengersInTrain(int trainId) throws DataBaseException {
+    public List<PassengerResponseDto> showAllPassengersInTrain(int trainId, int window) throws DataBaseException {
         List<Booking> bookings = bookingRepository.getAllBookingsByTrainId(trainId);
         List<Passenger> passengers = new ArrayList<>();
         for (Booking b : bookings) {
@@ -58,6 +59,12 @@ public class AdminService {
                             )
             );
         }
-        return passengerResponse;
+        passengerResponse.sort(Comparator.comparing(PassengerResponseDto::getpId));
+        int start = Math.min(passengerResponse.size(), (window * 5));
+        int end = Math.min(passengerResponse.size(), ((window + 1) * 5));
+        if (end - start >= 1) {
+            return new ArrayList<>(passengerResponse.subList(start, end));
+        }
+        return null;
     }
 }
