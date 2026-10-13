@@ -19,27 +19,36 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final PassengerRepository passengerRepository;
     private final WaitingListRepository waitingListRepository;
+    private final StationRepository stationRepository;
 
-    public BookingService(TrainRepository trainRepository, SeatRepository seatRepository, BookingRepository bookingRepository, PassengerRepository passengerRepository, WaitingListRepository waitingListRepository) {
+    public BookingService(TrainRepository trainRepository,
+                          SeatRepository seatRepository,
+                          BookingRepository bookingRepository,
+                          PassengerRepository passengerRepository,
+                          WaitingListRepository waitingListRepository,
+                          StationRepository stationRepository) {
         this.trainRepository = trainRepository;
         this.seatRepository = seatRepository;
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
         this.waitingListRepository = waitingListRepository;
+        this.stationRepository = stationRepository;
     }
 
-    public List<TrainResponseDto> getAllTrains() throws DataBaseException {
+    public List<TrainResponseDto> getAllTrains(Station from, Station to) throws DataBaseException {
+        if (from.getSequenceNo() >= to.getSequenceNo()) throw new IllegalArgumentException("No Trains Operating through this route");
         List<Train> trains = trainRepository.getAllTrains();
         List<TrainResponseDto> trainResponse = new ArrayList<>();
 
         for (Train t : trains) {
-            trainResponse.add(new TrainResponseDto(t, getAvailableSeats(t.getTrainId())));
+            trainResponse.add(new TrainResponseDto(t, getAvailableSeats(t.getTrainId(), from, to)));
         }
         return trainResponse;
     }
 
-    public SeatAvailabilityDto getAvailableSeats(int trainId) throws DataBaseException {
-        int cnfSeats = seatRepository.getAvailableSeats(trainId).size();
+    public SeatAvailabilityDto getAvailableSeats(int trainId, Station from, Station to) throws DataBaseException {
+        int mask = calculateMask(from.getSequenceNo(), to.getSequenceNo());
+        int cnfSeats = seatRepository.getAvailableSeats(trainId, mask).size();
         if (cnfSeats > 0) return new SeatAvailabilityDto("CNF", cnfSeats);
         int racNo = waitingListRepository.getAvailableRac(trainId);
         if (racNo > 0) return new SeatAvailabilityDto("RAC ", racNo);
@@ -48,11 +57,13 @@ public class BookingService {
         return new SeatAvailabilityDto("REGRET", -1);
     }
 
-    public BookingResponseDto bookTickets(int trainId, String from, String to, List<PassengerRequestDto> passengers) throws DataBaseException {
+    public BookingResponseDto bookTickets(int trainId, Station from, Station to, List<PassengerRequestDto> passengers) throws DataBaseException {
 
         if (passengers == null || passengers.isEmpty()) throw new InvalidInputException("No Passengers Provided");
 
-        List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId);
+        int requiredMask = calculateMask(from.getSequenceNo(), to.getSequenceNo());
+
+        List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId, requiredMask);
         int totalPassengers = passengers.size();
         int cnfAvail = availableSeats.size();
         int cnfCnt = Math.min(cnfAvail, totalPassengers);
@@ -64,23 +75,24 @@ public class BookingService {
         if (passengers.size() > currentCanBook) throw new SeatNotFoundException("Only "+currentCanBook+" Seats left please Enter "+currentCanBook+" passengers.");
 
         String pnr = generatePNR();
-        Booking currentBooking = new Booking(0, pnr, from, to, trainId, SessionStorage.getCurrentUser().getUserId(), BookingStatus.ACTIVE);
+        Booking currentBooking = new Booking(0, pnr, from.getStationCode(), to.getStationCode(), trainId, SessionStorage.getCurrentUser().getUserId(), BookingStatus.ACTIVE);
         bookingRepository.addBooking(currentBooking);
 
         List<Passenger> selectedPassengers = new ArrayList<>();
-        List<Integer> cnfSeatIds = new ArrayList<>();
+        List<SeatUpdateRequestDto> seatUpdateRequestDtos = new ArrayList<>();
 
         for (int i=0; i<cnfCnt; i++) {
              PassengerRequestDto curPassenger = passengers.get(i);
              Seat curSeat = availableSeats.get(i);
+             int newMask = curSeat.getMask() ^ requiredMask;
 //             seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
              Passenger cnfPassenger = new Passenger(0, curPassenger.getName(), curPassenger.getAge(), PassengerStatus.CNF, pnr, curSeat.getSeatId());
-             cnfSeatIds.add(curSeat.getSeatId());
+             seatUpdateRequestDtos.add(new SeatUpdateRequestDto(curSeat.getSeatId(), newMask));
 //             passengerRepository.addPassenger(cnfPassenger);
              selectedPassengers.add(cnfPassenger);
          }
-        if (!cnfSeatIds.isEmpty()) {
-            seatRepository.updateAllSeatStatus(cnfSeatIds, SeatStatus.BOOKED);
+        if (!seatUpdateRequestDtos.isEmpty()) {
+            seatRepository.updateAllSeatStatus(seatUpdateRequestDtos, SeatStatus.BOOKED);
         }
          if (cnfAvail < totalPassengers) {
              List<Passenger> wlPassengers = updateWaitingQueue(cnfCnt, passengers, pnr, racAvail, wlAvail);
@@ -101,7 +113,7 @@ public class BookingService {
         }
 
          List<PassengerResponseDto> addedPassengers = gatherPassengerDetails(pnr, trainId);
-         return new BookingResponseDto(pnr, from, to, trainRepository.getTrainById(trainId), addedPassengers.size(), addedPassengers, currentBooking.getStatus());
+         return new BookingResponseDto(pnr, from.getStationCode(), to.getStationCode(), trainRepository.getTrainById(trainId), addedPassengers.size(), addedPassengers, currentBooking.getStatus());
     }
 
     public List<Booking> getAllBookings() throws DataBaseException {
@@ -174,5 +186,17 @@ public class BookingService {
         List<Booking> bookingList =  bookingRepository.getActiveBookings(SessionStorage.getCurrentUser().getUserId());
         if (bookingList.isEmpty()) throw new DataBaseException("No Active Bookings Found");
         return bookingList;
+    }
+
+    public Station getStation(String stationCode) {
+        return stationRepository.getStationByCode(stationCode);
+    }
+
+    private int calculateMask(int fromSeq, int toSeq) {
+        long mask = 0L;
+        for (int i=fromSeq; i<toSeq; i++) {
+            mask |= (1L << (i - 1));
+        }
+        return (int) mask;
     }
 }

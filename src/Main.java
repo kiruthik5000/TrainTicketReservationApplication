@@ -16,10 +16,11 @@ public class Main {
         SeatRepository seatRepository = new InMemorySeatRepository();
         TrainRepository trainRepository = new InMemoryTrainRepository();
         WaitingListRepository waitingListRepository = new InMemoryWaitingListRepository();
+        StationRepository stationRepository = new InMemoryStationRepository();
 
         UserService userService = new UserService(userRepository);
-        BookingService bookingService = new BookingService(trainRepository, seatRepository, bookingRepository, passengerRepository, waitingListRepository);
-        CancellationService cancellationService = new CancellationService(bookingRepository, seatRepository, waitingListRepository, passengerRepository);
+        BookingService bookingService = new BookingService(trainRepository, seatRepository, bookingRepository, passengerRepository, waitingListRepository, stationRepository);
+        CancellationService cancellationService = new CancellationService(bookingRepository, seatRepository, waitingListRepository, passengerRepository, stationRepository);
         AdminService adminService = new AdminService(trainRepository, bookingRepository,passengerRepository,seatRepository, waitingListRepository);
 
         UserUi userUi = new UserUi(userService);

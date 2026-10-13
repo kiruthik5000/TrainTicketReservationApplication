@@ -8,6 +8,7 @@ import exception.InvalidInputException;
 import exception.ItemNotFoundException;
 import exception.SeatNotFoundException;
 import model.Booking;
+import model.Station;
 import model.Train;
 import service.BookingService;
 import utils.InputHandler;
@@ -26,19 +27,28 @@ public class BookingUi {
     public void bookTickets() throws Exception {
         if (!SessionStorage.userIsLoggedIn()) return;
         String from = InputHandler.getStringValue("Departure Station code");
-        String to = InputHandler.getStringValue("Arrival Station code");
-        System.out.println();
+        Station fromStation = bookingService.getStation(from);
 
-        List<TrainResponseDto> trainList = bookingService.getAllTrains();
+        if (fromStation == null) throw new ItemNotFoundException("Invalid Departure Station Code");
+        String to = InputHandler.getStringValue("Arrival Station code");
+        Station toStation = bookingService.getStation(to);
+
+        if (toStation == null) throw new ItemNotFoundException("Invalid Arrival Station code");
+
+        List<TrainResponseDto> trainList = bookingService.getAllTrains(fromStation, toStation);
 
         if (trainList == null || trainList.isEmpty()) throw new ItemNotFoundException("No trains found for this schedule");
 
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1)+". "+trainList.get(i));
         }
-
+        System.out.println((trainList.size() + 1)+". Back to Main Menu");
         System.out.println();
-        int choice = InputHandler.getNumericValue("Train Index", trainList.size());
+        int choice = InputHandler.getNumericValue("Train Index", trainList.size() + 1);
+        if (choice - 1 == trainList.size()) {
+            System.out.println("Returning to Main Menu");
+            return;
+        }
         TrainResponseDto selectedTrain = trainList.get(choice - 1);
         Train curTrain = selectedTrain.getTrain();
         if (selectedTrain.getSeatAvailabilityDto().getSeatClass().equals("REGRET")) throw new SeatNotFoundException("No seats found for this train");
@@ -55,7 +65,7 @@ public class BookingUi {
                 for (PassengerRequestDto p : passengersList) {
                     System.out.println(p);
                 }
-                BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), from, to, passengersList);
+                BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), fromStation, toStation, passengersList);
                 System.out.println(responseDto);
                 break;
             }catch (InvalidInputException | SeatNotFoundException e) {

@@ -18,7 +18,7 @@ public class InputHandler {
                 if (value > limit) throw new InvalidInputException("Enter option within [1 - "+limit+"].");
                 return value;
             } catch (NumberFormatException e) {
-                System.out.println("Enter numeric Input "+e.getMessage());
+                System.out.println("Enter numeric Input for"+label);
             } catch (Exception e) {
                 System.out.println("Unexpected Error Occurred "+e.getMessage());
             }

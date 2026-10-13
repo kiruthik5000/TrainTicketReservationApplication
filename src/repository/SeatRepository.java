@@ -1,5 +1,6 @@
 package repository;
 
+import dto.SeatUpdateRequestDto;
 import exception.DataBaseException;
 import model.Seat;
 import model.SeatStatus;
@@ -7,8 +8,8 @@ import model.SeatStatus;
 import java.util.List;
 
 public interface SeatRepository {
-    List<Seat> getAvailableSeats(int trainId) throws DataBaseException;
+    List<Seat> getAvailableSeats(int trainId, int mask) throws DataBaseException;
     void updateStatus(int seatId, SeatStatus status) throws DataBaseException;
     Seat getSeatById(int seatId) throws DataBaseException;
-    void updateAllSeatStatus(List<Integer> seatIds, SeatStatus status);
+    void updateAllSeatStatus(List<SeatUpdateRequestDto> updateRequestDtos, SeatStatus status);
 }

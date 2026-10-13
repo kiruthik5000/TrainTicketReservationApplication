@@ -1,5 +1,6 @@
 package repository.Implementation.DataBase;
 
+import dto.SeatUpdateRequestDto;
 import exception.DataBaseException;
 import model.Seat;
 import model.SeatStatus;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class DbSeatRepository implements SeatRepository {
     @Override
-    public List<Seat> getAvailableSeats(int trainId) throws DataBaseException {
+    public List<Seat> getAvailableSeats(int trainId, int mask) throws DataBaseException {
         String query = "SELECT * FROM seat WHERE trainId = ? AND status = 'AVAILABLE';";
 
         try (
@@ -31,7 +32,8 @@ public class DbSeatRepository implements SeatRepository {
                                 rs.getInt("seatId"),
                                 rs.getInt("seatNo"),
                                 rs.getInt("trainId"),
-                                SeatStatus.valueOf(rs.getString("status"))
+                                SeatStatus.valueOf(rs.getString("status")),
+                                15
                         )
                 );
             }
@@ -68,7 +70,8 @@ public class DbSeatRepository implements SeatRepository {
                         rs.getInt("seatId"),
                         rs.getInt("seatNo"),
                         rs.getInt("trainId"),
-                        SeatStatus.valueOf(rs.getString("status"))
+                        SeatStatus.valueOf(rs.getString("status")),
+                        15
                 );
             }
             return null;
@@ -78,16 +81,16 @@ public class DbSeatRepository implements SeatRepository {
     }
 
     @Override
-    public void updateAllSeatStatus(List<Integer> seatIds, SeatStatus status) {
+    public void updateAllSeatStatus(List<SeatUpdateRequestDto> seatIds, SeatStatus status) {
         String query = "UPDATE seat SET status = ? WHERE seatId = ?;";
 
         try (
                 Connection connection = DbUtils.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)
         ) {
-            for (int i : seatIds) {
+            for (SeatUpdateRequestDto seat : seatIds) {
                 preparedStatement.setObject(1, status.name());
-                preparedStatement.setObject(2, i);
+                preparedStatement.setObject(2, seat.getSeatId());
 
                 preparedStatement.addBatch();
             }
