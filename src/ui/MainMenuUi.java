@@ -84,6 +84,7 @@ public class MainMenuUi {
             bookingUi.bookTickets();
         } catch (Exception e) {
             System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
+            e.printStackTrace();
         }
     }
 

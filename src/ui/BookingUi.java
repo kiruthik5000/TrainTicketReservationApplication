@@ -2,6 +2,7 @@ package ui;
 
 import dto.BookingResponseDto;
 import dto.PassengerRequestDto;
+import dto.TrainResponseDto;
 import exception.DataBaseException;
 import exception.InvalidInputException;
 import exception.ItemNotFoundException;
@@ -28,7 +29,7 @@ public class BookingUi {
         String to = InputHandler.getStringValue("Arrival Station code");
         System.out.println();
 
-        List<Train> trainList = bookingService.getAllTrains();
+        List<TrainResponseDto> trainList = bookingService.getAllTrains();
 
         if (trainList == null || trainList.isEmpty()) throw new ItemNotFoundException("No trains found for this schedule");
 
@@ -38,16 +39,13 @@ public class BookingUi {
 
         System.out.println();
         int choice = InputHandler.getNumericValue("Train Index", trainList.size());
-        Train selectedTrain = trainList.get(choice - 1);
-
-        String seatNo = bookingService.getAvailableSeats(selectedTrain.getTrainId());
-        if (seatNo.equals("Regret No More booking")) throw new SeatNotFoundException("Regret No More booking");
-
+        TrainResponseDto selectedTrain = trainList.get(choice - 1);
+        Train curTrain = selectedTrain.getTrain();
+        if (selectedTrain.getSeatAvailabilityDto().getSeatClass().equals("REGRET")) throw new SeatNotFoundException("No seats found for this train");
         while (true) {
             try {
                 System.out.println("------------------------");
                 System.out.println(selectedTrain);
-                System.out.println("Seats: "+seatNo);
 
                 List<PassengerRequestDto> passengersList = gatherPassengers();
 
@@ -57,7 +55,7 @@ public class BookingUi {
                 for (PassengerRequestDto p : passengersList) {
                     System.out.println(p);
                 }
-                BookingResponseDto responseDto = bookingService.bookTickets(selectedTrain.getTrainId(), from, to, passengersList);
+                BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), from, to, passengersList);
                 System.out.println(responseDto);
                 break;
             }catch (InvalidInputException | SeatNotFoundException e) {

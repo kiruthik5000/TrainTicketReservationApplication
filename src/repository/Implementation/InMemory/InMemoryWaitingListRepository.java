@@ -51,12 +51,14 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
 
     @Override
     public int getAvailableRac(int trainId) {
+        if (racList.get(trainId) == null) return -1;
         return racLimit - racList.get(trainId).size();
     }
 
     @Override
     public int getAvailableWl(int trainId) {
-        return wlLimit - wlList.get(trainId).size();
+        if (wlList.get(trainId) == null) return -1;
+        return wlLimit - racList.get(trainId).size();
     }
 
     @Override

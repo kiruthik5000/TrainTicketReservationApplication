@@ -1,8 +1,6 @@
 package service;
 
-import dto.BookingResponseDto;
-import dto.PassengerRequestDto;
-import dto.PassengerResponseDto;
+import dto.*;
 import exception.DataBaseException;
 import exception.InvalidInputException;
 import exception.ItemNotFoundException;
@@ -30,24 +28,29 @@ public class BookingService {
         this.waitingListRepository = waitingListRepository;
     }
 
-    public List<Train> getAllTrains() throws DataBaseException {
-        return trainRepository.getAllTrains();
+    public List<TrainResponseDto> getAllTrains() throws DataBaseException {
+        List<Train> trains = trainRepository.getAllTrains();
+        List<TrainResponseDto> trainResponse = new ArrayList<>();
+
+        for (Train t : trains) {
+            trainResponse.add(new TrainResponseDto(t, getAvailableSeats(t.getTrainId())));
+        }
+        return trainResponse;
     }
 
-    public String getAvailableSeats(int trainId) throws DataBaseException {
+    public SeatAvailabilityDto getAvailableSeats(int trainId) throws DataBaseException {
         int cnfSeats = seatRepository.getAvailableSeats(trainId).size();
-        if (cnfSeats > 0) return "CNF "+cnfSeats;
+        if (cnfSeats > 0) return new SeatAvailabilityDto("CNF", cnfSeats);
         int racNo = waitingListRepository.getAvailableRac(trainId);
-        if (racNo > 0) return "RAC "+racNo;
+        if (racNo > 0) return new SeatAvailabilityDto("RAC ", racNo);
         int wlNo = waitingListRepository.getAvailableWl(trainId);
-        if (wlNo > 0) return "WL "+wlNo;
-        return "Regret No More booking";
+        if (wlNo > 0) return new SeatAvailabilityDto("WL ", wlNo);
+        return new SeatAvailabilityDto("REGRET", -1);
     }
 
     public BookingResponseDto bookTickets(int trainId, String from, String to, List<PassengerRequestDto> passengers) throws DataBaseException {
 
         if (passengers == null || passengers.isEmpty()) throw new InvalidInputException("No Passengers Provided");
-
 
         List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId);
         int totalPassengers = passengers.size();
@@ -108,6 +111,7 @@ public class BookingService {
     public BookingResponseDto getBookingDetails(String pnr) throws DataBaseException {
         Booking curBooking = bookingRepository.getBookingByPnr(pnr);
         if (curBooking == null) throw new ItemNotFoundException("No bookings found for this Account");
+        if (curBooking.getStatus().equals(BookingStatus.CANCELLED)) throw new IllegalArgumentException("This booking is cancelled");
         Train curTrain = trainRepository.getTrainById(curBooking.getTrainId());
         if (curTrain == null) throw new ItemNotFoundException("No Train found for this trainId"+curBooking.getTrainId());
         List<PassengerResponseDto> curPassengers = gatherPassengerDetails(pnr, curTrain.getTrainId());

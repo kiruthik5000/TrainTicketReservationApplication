@@ -5,41 +5,50 @@ import model.Booking;
 import model.BookingStatus;
 import repository.BookingRepository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryBookingRepository implements BookingRepository {
     private int nextBookingId = 1;
     private final Map<Integer, Booking> bookingMap;
+    private final Map<String, Integer> pnrBookingMap;
+    private final Map<Integer, List<Integer>> userBookingMap;
 
     public InMemoryBookingRepository() {
-        this.bookingMap = new HashMap<>();
+        this.userBookingMap = new ConcurrentHashMap<>();
+        this.pnrBookingMap = new ConcurrentHashMap<>();
+        this.bookingMap = new ConcurrentHashMap<>();
+
+        pnrBookingMap.put("123456789", 1);
         bookingMap.put(1, new Booking(1, "123456789", "CBE", "TBM", 1, 1, BookingStatus.ACTIVE));
+        userBookingMap.put(1, new ArrayList<>(List.of(1)));
     }
 
 
     @Override
     public List<Booking> getBookingByUser(int userId) {
-        return bookingMap
-                .values()
-                .stream()
-                .filter(k -> k.getUserId() == userId)
-                .toList();
+        List<Integer> userBookingIds = userBookingMap.get(userId);
+        List<Booking> bookingList = new ArrayList<>();
+        for (int id : userBookingIds) {
+            bookingList.add(bookingMap.get(id));
+        }
+        return bookingList;
     }
 
     @Override
     public void addBooking(Booking booking) {
         booking.setBookingId(++nextBookingId);
         bookingMap.put(booking.getBookingId(), booking);
+        pnrBookingMap.put(booking.getPnr(), booking.getBookingId());
+        userBookingMap.computeIfAbsent(booking.getUserId(), k->new ArrayList<>()).add(booking.getBookingId());
     }
 
     @Override
     public Booking getBookingByPnr(String pnr){
-        return bookingMap.values()
-                .stream()
-                .filter(k->k.getPnr().equals(pnr))
-                .findFirst().orElse(null);
+        return bookingMap.get(pnrBookingMap.get(pnr));
     }
 
     @Override

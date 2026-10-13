@@ -18,6 +18,7 @@ import java.util.Set;
 public class CancellationUi {
     private final CancellationService cancellationService;
     private final BookingService bookingService;
+
     public CancellationUi(CancellationService cancellationService, BookingService bookingService) {
         this.cancellationService = cancellationService;
         this.bookingService = bookingService;
@@ -73,9 +74,9 @@ public class CancellationUi {
         }
         Set<Integer> passengerIndex = getAllPassengerIndex(passengers, passengers.size());
         System.out.println("Selected passengers: ");
-        for (int i : passengerIndex) {
-            if (i >= 0 && i < passengers.size()) {
-                System.out.println(passengers.get(i));
+        for (PassengerResponseDto p : passengers) {
+            if (passengerIndex.contains(p.getpId())) {
+                System.out.println(p);
             }
         }
         return passengerIndex;
