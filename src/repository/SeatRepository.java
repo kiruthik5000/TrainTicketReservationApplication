@@ -9,7 +9,6 @@ import java.util.List;
 
 public interface SeatRepository {
     List<Seat> getAvailableSeats(int trainId, int mask) throws DataBaseException;
-    void updateStatus(int seatId, SeatStatus status) throws DataBaseException;
     Seat getSeatById(int seatId) throws DataBaseException;
     void updateAllSeatStatus(List<SeatUpdateRequestDto> updateRequestDtos, SeatStatus status);
 }

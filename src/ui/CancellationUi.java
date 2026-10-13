@@ -44,30 +44,37 @@ public class CancellationUi {
         System.out.println("3. return");
         System.out.println();
         choice = InputHandler.getNumericValue("Choice", 3);
+
         if (choice == 1) {
-            if (cancellationService.cancelFullBooking(selectedBooking.getPnr())) {
-                System.out.println("Booking cancelled successfully.");
-            } else {
-                System.out.println("Unexpected Error in cancellation.");
+            String cnf = InputHandler.getStringValue("Confirm full cancellation [y / n]");
+            if (cnf.equals("y")) {
+                if (cancellationService.cancelFullBooking(selectedBooking.getPnr())) {
+                    System.out.println("Booking cancelled successfully.");
+                } else {
+                    System.out.println("Unexpected Error in cancellation.");
+                }
             }
         } else if (choice == 2) {
-            Set<Integer> selectedPassengers = gatherPassengersNeedToRemove(selectedBooking.getPnr(), selectedBooking.getTrainId());
+            Set<Integer> selectedPassengers = gatherPassengersNeedToRemove(selectedBooking, selectedBooking.getTrainId());
 
             if (selectedPassengers.isEmpty()) {
                 System.out.println("No passengers selected.");
                 return;
             }
-            if (cancellationService.partialCancellation(selectedBooking.getPnr(), selectedPassengers)) {
-                System.out.println("Selected passengers are cancelled successfully.");
-            } else {
-                System.out.println("Unexpected Error in cancellation");
+            String cnf = InputHandler.getStringValue("Confirm partial cancellation [y / n]");
+            if (cnf.equals("y")) {
+                if (cancellationService.partialCancellation(selectedBooking.getPnr(), selectedPassengers)) {
+                    System.out.println("Selected passengers are cancelled successfully.");
+                } else {
+                    System.out.println("Unexpected Error in cancellation");
+                }
             }
         }
 
     }
 
-    private Set<Integer> gatherPassengersNeedToRemove(String pnr, int trainId) throws DataBaseException {
-        List<PassengerResponseDto> passengers = bookingService.gatherPassengerDetails(pnr, trainId);
+    private Set<Integer> gatherPassengersNeedToRemove(Booking curBooking, int trainId) throws DataBaseException {
+        List<PassengerResponseDto> passengers = bookingService.gatherPassengerDetails(curBooking, trainId);
         System.out.println("\nPassengers:");
         for (int i=0; i<passengers.size(); i++) {
             System.out.println((i + 1)+". "+passengers.get(i));

@@ -3,7 +3,6 @@ package repository;
 import exception.DataBaseException;
 import model.Train;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface TrainRepository {

@@ -112,7 +112,7 @@ public class BookingService {
             waitingListRepository.addAllWl(trainId, wlPassengers);
         }
 
-         List<PassengerResponseDto> addedPassengers = gatherPassengerDetails(pnr, trainId);
+         List<PassengerResponseDto> addedPassengers = gatherPassengerDetails(currentBooking, trainId);
          return new BookingResponseDto(pnr, from.getStationCode(), to.getStationCode(), trainRepository.getTrainById(trainId), addedPassengers.size(), addedPassengers, currentBooking.getStatus());
     }
 
@@ -126,7 +126,7 @@ public class BookingService {
         if (curBooking.getStatus().equals(BookingStatus.CANCELLED)) throw new IllegalArgumentException("This booking is cancelled");
         Train curTrain = trainRepository.getTrainById(curBooking.getTrainId());
         if (curTrain == null) throw new ItemNotFoundException("No Train found for this trainId"+curBooking.getTrainId());
-        List<PassengerResponseDto> curPassengers = gatherPassengerDetails(pnr, curTrain.getTrainId());
+        List<PassengerResponseDto> curPassengers = gatherPassengerDetails(curBooking, curTrain.getTrainId());
         return new BookingResponseDto(pnr, curBooking.getFrom(), curBooking.getTo(), curTrain, curPassengers.size(), curPassengers, curBooking.getStatus());
     }
 
@@ -156,8 +156,8 @@ public class BookingService {
 
        return waitingPassengers;
     }
-    public List<PassengerResponseDto> gatherPassengerDetails(String pnr, int trainId) throws DataBaseException {
-        List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(pnr);
+    public List<PassengerResponseDto> gatherPassengerDetails(Booking booking, int trainId) throws DataBaseException {
+        List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(booking.getPnr());
         List<PassengerResponseDto> passengerResponseDtos = new ArrayList<>();
         for (Passenger p : passengers) {
 //            System.out.println("current passenger status"+p.getStatus());
@@ -172,7 +172,7 @@ public class BookingService {
                 }
             }
             passengerResponseDtos.add(
-                    new PassengerResponseDto(p.getPassengerId(), p.getName(), p.getAge(), p.getStatus(), seatNo)
+                    new PassengerResponseDto(p.getPassengerId(), p.getName(), p.getAge(), p.getStatus(), seatNo, booking.getFrom(), booking.getTo())
             );
         }
         return passengerResponseDtos;

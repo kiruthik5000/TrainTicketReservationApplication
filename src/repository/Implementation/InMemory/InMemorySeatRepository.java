@@ -6,7 +6,6 @@ import model.SeatStatus;
 import repository.SeatRepository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,11 +36,6 @@ public class InMemorySeatRepository implements SeatRepository {
             }
         }
         return availableSeats;
-    }
-
-    @Override
-    public void updateStatus(int seatId, SeatStatus status) {
-        seatMap.get(seatId).setStatus(status);
     }
 
     @Override

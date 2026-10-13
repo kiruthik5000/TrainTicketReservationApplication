@@ -41,6 +41,7 @@ public class BookingUi {
 
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1)+". "+trainList.get(i));
+            System.out.println();
         }
         System.out.println((trainList.size() + 1)+". Back to Main Menu");
         System.out.println();
@@ -65,8 +66,14 @@ public class BookingUi {
                 for (PassengerRequestDto p : passengersList) {
                     System.out.println(p);
                 }
-                BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), fromStation, toStation, passengersList);
-                System.out.println(responseDto);
+                System.out.println();
+                String cnf = InputHandler.getStringValue("Confirm booking [y / n]");
+                if (cnf.equals("y")) {
+                    BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), fromStation, toStation, passengersList);
+                    System.out.println(responseDto);
+                } else {
+                    return;
+                }
                 break;
             }catch (InvalidInputException | SeatNotFoundException e) {
                 System.out.println(e.getMessage());

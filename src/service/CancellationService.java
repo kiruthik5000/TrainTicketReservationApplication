@@ -34,35 +34,15 @@ public class CancellationService {
         List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(pnr);
         if (passengers == null || passengers.isEmpty()) throw new ItemNotFoundException("No Passenger found");
 
-//        for (Passenger p : passengers) {
-//            cancelPassenger(p, booking.getTrainId());
-//        }
         cancelPassengers(passengers, booking.getTrainId(), mask);
 
-        promoteWlListToCnf(booking.getTrainId(), mask);
+        promoteRacToCnf(booking.getTrainId(), mask);
 
         bookingRepository.updateStatus(booking.getBookingId(), BookingStatus.CANCELLED);
         return true;
     }
 
-//    private void cancelPassenger(Passenger p, int trainId) throws DataBaseException {
-//        if (p.getStatus() == PassengerStatus.CANCELLED) return;
-//
-//        if (p.getStatus() == PassengerStatus.CNF) {
-//            if (p.getSeatId() != -1) {
-//                seatRepository.updateStatus(p.getSeatId(), SeatStatus.AVAILABLE);
-//            }
-//        }
-//        if (p.getStatus() == PassengerStatus.RAC) {
-//            waitingListRepository.removeRacPassenger(p.getPassengerId(), trainId);
-//        }
-//        if (p.getStatus() == PassengerStatus.WL) {
-//            waitingListRepository.removeWlPassenger(p.getPassengerId(), trainId);
-//        }
-//        passengerRepository.updatePassengerStatusAndSeatNo(p.getPassengerId(), PassengerStatus.CANCELLED, -1);
-//    }
-
-    private void promoteWlListToCnf(int trainId, int requiredMask) throws DataBaseException {
+    private void promoteRacToCnf(int trainId, int requiredMask) throws DataBaseException {
 
         List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId, requiredMask);
 
@@ -107,7 +87,7 @@ public class CancellationService {
             }
 
             if (!racRemove.isEmpty()) {
-                waitingListRepository.removeAllWlPassenger(racRemove, trainId);
+                waitingListRepository.removeAllRacPassenger(racRemove, trainId);
             }
 
             if (!wlRemove.isEmpty()) {
@@ -120,21 +100,6 @@ public class CancellationService {
             if (!cnfDtos.isEmpty()) {
                 passengerRepository.updateAllPassengerStatusAndSeatNo(cnfDtos, PassengerStatus.CNF);
             }
-//        for (Seat s : availableSeats) {
-//            int racPassengerId = waitingListRepository.getFirstRacPassenger(trainId);
-//            if (racPassengerId != -1) {
-//                passengerRepository.updatePassengerStatusAndSeatNo(racPassengerId, PassengerStatus.CNF, s.getSeatId());
-//                seatRepository.updateStatus(s.getSeatId(), SeatStatus.BOOKED);
-//                continue;
-//            }
-//            int wlPassengerId = waitingListRepository.getFirstWlPassenger(trainId);
-//            if (wlPassengerId != -1) {
-//                passengerRepository.updatePassengerStatusAndSeatNo(wlPassengerId, PassengerStatus.CNF, s.getSeatId());
-//                seatRepository.updateStatus(s.getSeatId(), SeatStatus.BOOKED);
-//                continue;
-//            }
-//            break;
-//        }
         }
         promoteWlToRac(trainId);
      }
@@ -145,16 +110,20 @@ public class CancellationService {
         if (availableRac <= 0) return;
 
         List<Passenger> wlPassengers = waitingListRepository.getWlPassengers(trainId, availableRac);
-
+        List<Integer> wlRemove = new ArrayList<>();
         if (!wlPassengers.isEmpty()) {
             waitingListRepository.addAllRac(trainId, wlPassengers);
         }
         List<PassengerSeatIdDto> dtos = new ArrayList<>();
         for (Passenger p : wlPassengers) {
+            wlRemove.add(p.getPassengerId());
             dtos.add(new PassengerSeatIdDto(
                     p.getPassengerId(),
                     -1
             ));
+        }
+        if (!wlRemove.isEmpty()) {
+            waitingListRepository.removeAllWlPassenger(wlRemove, trainId);
         }
         if (!dtos.isEmpty()) {
             passengerRepository.updateAllPassengerStatusAndSeatNo(dtos, PassengerStatus.RAC);
@@ -177,7 +146,7 @@ public class CancellationService {
             }
         }
         cancelPassengers(toCancelPassengers, booking.getTrainId(), mask);
-        promoteWlListToCnf(booking.getTrainId(), mask);
+        promoteRacToCnf(booking.getTrainId(), mask);
         if (checkAllPassengersAreRemoved(pnr)) {
             bookingRepository.updateStatus(booking.getBookingId(), BookingStatus.CANCELLED);
         }

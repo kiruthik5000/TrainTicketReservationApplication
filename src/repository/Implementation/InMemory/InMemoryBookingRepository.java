@@ -1,12 +1,10 @@
 package repository.Implementation.InMemory;
 
-import exception.DataBaseException;
 import model.Booking;
 import model.BookingStatus;
 import repository.BookingRepository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,13 +21,14 @@ public class InMemoryBookingRepository implements BookingRepository {
         this.bookingMap = new ConcurrentHashMap<>();
 
         pnrBookingMap.put("123456789", 1);
-        bookingMap.put(1, new Booking(1, "123456789", "CBE", "TBM", 1, 1, BookingStatus.ACTIVE));
+        bookingMap.put(1, new Booking(1, "123456789", "A", "B", 1, 1, BookingStatus.ACTIVE));
         userBookingMap.put(1, new ArrayList<>(List.of(1)));
     }
 
 
     @Override
     public List<Booking> getBookingByUser(int userId) {
+        if (!userBookingMap.containsKey(userId)) return null;
         List<Integer> userBookingIds = userBookingMap.get(userId);
         List<Booking> bookingList = new ArrayList<>();
         for (int id : userBookingIds) {
@@ -48,6 +47,7 @@ public class InMemoryBookingRepository implements BookingRepository {
 
     @Override
     public Booking getBookingByPnr(String pnr){
+        if (!pnrBookingMap.containsKey(pnr)) return null;
         return bookingMap.get(pnrBookingMap.get(pnr));
     }
 
@@ -74,7 +74,7 @@ public class InMemoryBookingRepository implements BookingRepository {
     }
 
     @Override
-    public int getTotalNoRows() throws DataBaseException {
+    public int getTotalNoRows() {
         return bookingMap.size();
     }
 }

@@ -36,6 +36,7 @@ public class AdminService {
         }
         List<PassengerResponseDto> passengerResponse = new ArrayList<>();
         for (Passenger p : passengers) {
+            Booking booking = bookingRepository.getBookingByPnr(p.getPnr());
             if(p.getStatus().equals(PassengerStatus.CANCELLED)) continue;
             int seatNo;
             if (p.getStatus().equals(PassengerStatus.CNF)) {
@@ -51,7 +52,9 @@ public class AdminService {
                             p.getName(),
                             p.getAge(),
                             p.getStatus(),
-                            seatNo
+                            seatNo,
+                            booking.getFrom(),
+                            booking.getTo()
                             )
             );
         }

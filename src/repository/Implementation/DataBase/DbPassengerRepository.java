@@ -39,35 +39,6 @@ public class DbPassengerRepository implements PassengerRepository {
         }
     }
 
-    @Override
-    public Passenger addPassenger(Passenger passenger) throws DataBaseException {
-        String query = "INSERT INTO passenger(name, age, status, pnr, seatId) values (?,?,?,?,?);";
-
-        try (
-             Connection connection = DbUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
-                ) {
-            Integer seatId = passenger.getSeatId() != -1 ? passenger.getSeatId() : null;
-            preparedStatement.setString(1, passenger.getName());
-            preparedStatement.setInt(2, passenger.getAge());
-            preparedStatement.setString(3, passenger.getStatus().name());
-            preparedStatement.setString(4, passenger.getPnr());
-            preparedStatement.setObject(5, seatId);
-
-            preparedStatement.executeUpdate();
-
-            try (ResultSet rs = preparedStatement.getGeneratedKeys()) {
-                if (rs.next()) {
-                    int pId = rs.getInt(1);
-                    return getPassengerById(pId);
-                }
-            }
-        } catch (Exception e) {
-            throw new DataBaseException(e.getMessage());
-        }
-        return null;
-    }
-
     private Passenger getPassengerById(int pId) throws DataBaseException {
         String query = "SELECT * FROM passenger WHERE passengerId = ?;";
 
@@ -93,24 +64,6 @@ public class DbPassengerRepository implements PassengerRepository {
         }
         return null;
     }
-
-    @Override
-    public void updatePassengerStatusAndSeatNo(int id, PassengerStatus status, int seatNo) throws DataBaseException {
-        String query = "UPDATE passenger SET status = ?, seatId = ? WHERE passengerId = ?;";
-
-        try {
-            Integer seatId = seatNo == -1 ? null : seatNo;
-            DbUtils.executeUpdateQuery(query, Arrays.asList(
-                    status.name(),
-                    seatId,
-                    id
-            ));
-        } catch (Exception e) {
-            throw new DataBaseException(e.getMessage());
-        }
-    }
-
-
 
     @Override
     public void addAllPassenger(List<Passenger> passengers) throws DataBaseException {

@@ -42,20 +42,6 @@ public class DbSeatRepository implements SeatRepository {
             throw new DataBaseException(e.getMessage());
         }
     }
-
-    @Override
-    public void updateStatus(int seatId, SeatStatus status) throws DataBaseException {
-        String query = "UPDATE seat SET status = ? WHERE seatId = ?;";
-        try {
-            DbUtils.executeUpdateQuery(query, List.of(
-                    status.name(),
-                    seatId
-            ));
-        } catch (Exception e) {
-            throw new DataBaseException(e.getMessage());
-        }
-    }
-
     @Override
     public Seat getSeatById(int seatId) throws DataBaseException {
         String query = "SELECT * FROM seat WHERE seatId = ?;";

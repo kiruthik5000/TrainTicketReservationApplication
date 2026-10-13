@@ -25,6 +25,7 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User getUserByEmail(String email) {
+        if (!emailUserMap.containsKey(email)) return null;
         return userMap.get(emailUserMap.get(email));
     }
 
@@ -32,5 +33,6 @@ public class InMemoryUserRepository implements UserRepository {
     public void save(User user) {
         user.setUserId(++nextUserId);
         userMap.put(nextUserId, user);
+        emailUserMap.put(user.getEmail(), nextUserId);
     }
 }

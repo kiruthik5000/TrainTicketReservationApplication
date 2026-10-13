@@ -1,6 +1,5 @@
 package repository.Implementation.InMemory;
 
-import exception.InvalidInputException;
 import model.Passenger;
 import repository.WaitingListRepository;
 
@@ -18,19 +17,6 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
         wlList = new HashMap<>();
         wlList.put(1, new LinkedList<>());
     }
-
-    public void addRac(int trainId, Passenger passenger) {
-        LinkedList<Passenger> curList = racList.getOrDefault(trainId, new LinkedList<>());
-        if (curList.size() >= racLimit) throw new InvalidInputException("RAC is Full");
-        curList.offerLast(passenger);
-    }
-
-    public void addWl(int trainId, Passenger passenger) {
-       LinkedList<Passenger> curList = wlList.getOrDefault(trainId, new LinkedList<>());
-       if (curList.size() >= wlLimit) throw new InvalidInputException("WL is Full");
-       curList.offerLast(passenger);
-    }
-
     @Override
     public void addAllRac(int trainId, List<Passenger> passengers) {
         LinkedList<Passenger> curList = racList.getOrDefault(trainId, new LinkedList<>());
@@ -58,7 +44,7 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
     @Override
     public int getAvailableWl(int trainId) {
         if (wlList.get(trainId) == null) return -1;
-        return wlLimit - racList.get(trainId).size();
+        return wlLimit - wlList.get(trainId).size();
     }
 
     @Override

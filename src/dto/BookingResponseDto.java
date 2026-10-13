@@ -26,7 +26,7 @@ public class BookingResponseDto {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("pnr: " + pnr +"( "+status+" )"+ "\n"+ from + " -- "+to + "\ntrain: " + train + "\nNumber Of Passengers : " + noOfPassengers);
+        sb.append("pnr: " + pnr +"( "+status+" )"+ "\ntrain: " + train + "\nNumber Of Passengers : " + noOfPassengers);
         for (int i=0; i<passengerResponseDtoList.size(); i++) {
             sb.append("\n").append((i + 1)+". "+passengerResponseDtoList.get(i).toString());
         }
