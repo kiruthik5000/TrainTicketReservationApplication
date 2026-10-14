@@ -10,10 +10,10 @@ import utils.SessionStorage;
 
 import java.util.List;
 
-public class AdminUI {
+public class AdminUi {
     private final AdminService adminService;
 
-    public AdminUI(AdminService adminService) {
+    public AdminUi(AdminService adminService) {
         this.adminService = adminService;
     }
 

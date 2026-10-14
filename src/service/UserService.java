@@ -16,7 +16,7 @@ public class UserService {
 
     public void saveUser(UserRequestDto dto) throws DataBaseException {
         if (dto == null || dto.getEmail() == null || dto.getPassword() == null || dto.getUsername() == null) throw new InvalidInputException("Entered User data is Invalid");
-        if (!validateEmail(dto.getEmail()) || !validatePassword(dto.getPassword())) return;
+        if (!validateEmail(dto.getEmail()) || !validatePassword(dto.getPassword())) throw new IllegalArgumentException("Invalid Email or Password");
         User newUser = new User(0,
                 dto.getUsername(),
                 dto.getEmail(),

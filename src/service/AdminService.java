@@ -61,7 +61,7 @@ public class AdminService {
         }
         passengerResponse.sort(Comparator.comparing(PassengerResponseDto::getpId));
         int start = Math.min(passengerResponse.size(), (window * 5));
-        int end = Math.min(passengerResponse.size(), ((window + 1) * 5));
+        int end = Math.min(passengerResponse.size(), ((window + 1) * 5) );
         if (end - start >= 1) {
             return new ArrayList<>(passengerResponse.subList(start, end));
         }

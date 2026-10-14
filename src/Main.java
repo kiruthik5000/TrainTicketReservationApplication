@@ -1,5 +1,4 @@
 import repository.*;
-import repository.Implementation.DataBase.*;
 import repository.Implementation.InMemory.*;
 import service.AdminService;
 import service.BookingService;
@@ -26,7 +25,7 @@ public class Main {
         UserUi userUi = new UserUi(userService);
         BookingUi bookingUi = new BookingUi(bookingService);
         CancellationUi cancellationUi = new CancellationUi(cancellationService, bookingService);
-        AdminUI adminUI = new AdminUI(adminService);
+        AdminUi adminUI = new AdminUi(adminService);
 
         MainMenuUi mainMenuUI = new MainMenuUi(userUi, bookingUi, cancellationUi, adminUI);
         mainMenuUI.start();

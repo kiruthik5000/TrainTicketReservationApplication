@@ -36,12 +36,14 @@ public class BookingService {
     }
 
     public List<TrainResponseDto> getAllTrains(Station from, Station to) throws DataBaseException {
-        if (from.getSequenceNo() >= to.getSequenceNo()) throw new IllegalArgumentException("No Trains Operating through this route");
-        List<Train> trains = trainRepository.getAllTrains();
+//        if (from.getSequenceNo() >= to.getSequenceNo()) throw new IllegalArgumentException("No Trains Operating through this route");
+//        List<Train> trains = trainRepository.getAllTrains();
+        List<Integer> trainIds = stationRepository.findTrains(from, to);
+        if (trainIds == null || trainIds.isEmpty()) throw new IllegalArgumentException("No Trains Operating through this route");
         List<TrainResponseDto> trainResponse = new ArrayList<>();
-
-        for (Train t : trains) {
-            trainResponse.add(new TrainResponseDto(t, getAvailableSeats(t.getTrainId(), from, to)));
+        for (int id : trainIds) {
+            Train curTrain = trainRepository.getTrainById(id);
+            trainResponse.add(new TrainResponseDto(curTrain, getAvailableSeats(id, from, to)));
         }
         return trainResponse;
     }

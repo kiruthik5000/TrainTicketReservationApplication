@@ -7,8 +7,8 @@ public class MainMenuUi {
     private final UserUi userUi;
     private final BookingUi bookingUi;
     private final CancellationUi cancellationUi;
-    private final AdminUI adminUI;
-    public MainMenuUi(UserUi userUi, BookingUi bookingUi, CancellationUi cancellationUi, AdminUI adminUI) {
+    private final AdminUi adminUI;
+    public MainMenuUi(UserUi userUi, BookingUi bookingUi, CancellationUi cancellationUi, AdminUi adminUI) {
         this.userUi = userUi;
         this.bookingUi = bookingUi;
         this.cancellationUi = cancellationUi;
