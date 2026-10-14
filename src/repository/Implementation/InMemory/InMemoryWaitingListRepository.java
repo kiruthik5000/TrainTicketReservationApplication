@@ -89,6 +89,16 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
         return getSequenceNo(trainId, pId, wlList);
     }
 
+    @Override
+    public int getNumberOfRac(int trainId) {
+        return racLimit;
+    }
+
+    @Override
+    public int getNumberOfWl(int trainId) {
+        return wlLimit;
+    }
+
     private int getSequenceNo(int trainId, int pId, Map<Integer, LinkedList<Passenger>> wlList) {
         LinkedList<Passenger> curList = wlList.get(trainId);
         if (curList == null) return -1;

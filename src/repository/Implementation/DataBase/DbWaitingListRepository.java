@@ -213,4 +213,14 @@ public class DbWaitingListRepository implements WaitingListRepository {
             throw new DataBaseException(e.getMessage());
         }
     }
+
+    @Override
+    public int getNumberOfRac(int trainId) {
+        return 0;
+    }
+
+    @Override
+    public int getNumberOfWl(int trainId) {
+        return 0;
+    }
 }

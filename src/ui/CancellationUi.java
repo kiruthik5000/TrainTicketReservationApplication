@@ -27,48 +27,53 @@ public class CancellationUi {
     public void cancelTickets() throws DataBaseException {
         SessionStorage.userIsLoggedIn();
         List<Booking> bookingList = bookingService.getActiveBookings();
-
         if (bookingList == null || bookingList.isEmpty()) throw new ItemNotFoundException("No Active Bookings Found");
-        for (int i=0; i<bookingList.size(); i++) {
+
+        for (int i = 0; i < bookingList.size(); i++) {
             Booking curBooking = bookingList.get(i);
             System.out.println((i + 1) + ". pnr: " + curBooking.getPnr() + "\t" + curBooking.getFrom() + " - " + curBooking.getTo() + "\t" + curBooking.getStatus());
         }
 
         int choice = InputHandler.getNumericValue("Choice of Booking", bookingList.size());
         Booking selectedBooking = bookingList.get(choice - 1);
-        BookingResponseDto dto = bookingService.getBookingDetails(selectedBooking.getPnr());
-        System.out.println(dto);
-        System.out.println();
-        System.out.println("1. Cancel Entire Booking");
-        System.out.println("2. Cancel Partial Booking");
-        System.out.println("3. return");
-        System.out.println();
-        choice = InputHandler.getNumericValue("Choice", 3);
+        while (true) {
+            BookingResponseDto dto = bookingService.getBookingDetails(selectedBooking.getPnr());
+            System.out.println();
+            System.out.println(dto);
+            System.out.println();
+            System.out.println("1. Cancel Entire Booking");
+            System.out.println("2. Cancel Partial Booking");
+            System.out.println("3. return");
+            System.out.println();
+            choice = InputHandler.getNumericValue("Choice", 3);
 
-        if (choice == 1) {
-            String cnf = InputHandler.getStringValue("Confirm full cancellation [y / n]");
-            if (cnf.equals("y")) {
-                if (cancellationService.cancelFullBooking(selectedBooking.getPnr())) {
-                    System.out.println("Booking cancelled successfully.");
-                } else {
-                    System.out.println("Unexpected Error in cancellation.");
+            if (choice == 1) {
+                String cnf = InputHandler.getStringValue("Confirm full cancellation [y / n]");
+                if (cnf.equals("y")) {
+                    if (cancellationService.cancelFullBooking(selectedBooking.getPnr())) {
+                        System.out.println("Booking cancelled successfully.");
+                    } else {
+                        System.out.println("Unexpected Error in cancellation.");
+                    }
+                    return;
                 }
-            }
-        } else if (choice == 2) {
-            Set<Integer> selectedPassengers = gatherPassengersNeedToRemove(selectedBooking, selectedBooking.getTrainId());
+            } else if (choice == 2) {
+                Set<Integer> selectedPassengers = gatherPassengersNeedToRemove(selectedBooking, selectedBooking.getTrainId());
 
-            if (selectedPassengers.isEmpty()) {
-                System.out.println("No passengers selected.");
-                return;
-            }
-            String cnf = InputHandler.getStringValue("Confirm partial cancellation [y / n]");
-            if (cnf.equals("y")) {
-                if (cancellationService.partialCancellation(selectedBooking.getPnr(), selectedPassengers)) {
-                    System.out.println("Selected passengers are cancelled successfully.");
-                } else {
-                    System.out.println("Unexpected Error in cancellation");
+                if (selectedPassengers.isEmpty()) {
+                    System.out.println("No passengers selected.");
+                    return;
                 }
-            }
+                String cnf = InputHandler.getStringValue("Confirm partial cancellation [y / n]");
+                if (cnf.equals("y")) {
+                    if (cancellationService.partialCancellation(selectedBooking.getPnr(), selectedPassengers)) {
+                        System.out.println("Selected passengers are cancelled successfully.");
+                    } else {
+                        System.out.println("Unexpected Error in cancellation");
+                    }
+                    return;
+                }
+            } else if (choice == 3) return;
         }
 
     }

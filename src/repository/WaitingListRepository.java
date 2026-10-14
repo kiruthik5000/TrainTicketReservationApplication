@@ -21,4 +21,7 @@ public interface WaitingListRepository {
 
     int getRacNo(int trainId, int pId) throws DataBaseException;
     int getWlNo(int trainId, int pId) throws DataBaseException;
+
+    int getNumberOfRac(int trainId);
+    int getNumberOfWl(int trainId);
 }
