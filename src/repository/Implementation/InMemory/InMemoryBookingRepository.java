@@ -8,14 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class InMemoryBookingRepository implements BookingRepository {
-    private int nextBookingId = 1;
+    private final AtomicInteger nextBookingId;
     private final Map<Integer, Booking> bookingMap;
     private final Map<String, Integer> pnrBookingMap;
     private final Map<Integer, List<Integer>> userBookingMap;
 
     public InMemoryBookingRepository() {
+        nextBookingId = new AtomicInteger(1);
         this.userBookingMap = new ConcurrentHashMap<>();
         this.pnrBookingMap = new ConcurrentHashMap<>();
         this.bookingMap = new ConcurrentHashMap<>();
@@ -39,7 +41,8 @@ public class InMemoryBookingRepository implements BookingRepository {
 
     @Override
     public void addBooking(Booking booking) {
-        booking.setBookingId(++nextBookingId);
+        nextBookingId.addAndGet(1);
+        booking.setBookingId(nextBookingId.get());
         bookingMap.put(booking.getBookingId(), booking);
         pnrBookingMap.put(booking.getPnr(), booking.getBookingId());
         userBookingMap.computeIfAbsent(booking.getUserId(), k->new ArrayList<>()).add(booking.getBookingId());

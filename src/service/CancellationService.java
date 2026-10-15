@@ -55,8 +55,8 @@ public class CancellationService {
                 toCancelPassengers.add(p);
             }
         }
-        cancelPassengers(toCancelPassengers, booking.getTrainId(), mask);
-        promoteRacToCnfSeats(booking.getTrainId(), mask);
+        int cancelled = cancelPassengers(toCancelPassengers, booking.getTrainId(), mask);
+        promoteRacToCnfSeats(booking.getTrainId(), cancelled);
         if (checkAllPassengersAreRemoved(pnr)) {
             bookingRepository.updateStatus(booking.getBookingId(), BookingStatus.CANCELLED);
         }

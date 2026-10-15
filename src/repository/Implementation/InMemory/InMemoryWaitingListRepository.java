@@ -1,5 +1,6 @@
 package repository.Implementation.InMemory;
 
+import exception.SeatNotFoundException;
 import model.Passenger;
 import repository.WaitingListRepository;
 
@@ -21,7 +22,7 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
     public void addAllRac(int trainId, List<Passenger> passengers) {
         LinkedList<Passenger> curList = racList.getOrDefault(trainId, new LinkedList<>());
         for (Passenger p : passengers) {
-            if (curList.size() >= racLimit) break;
+            if (curList.size() >= racLimit) throw new SeatNotFoundException("RAC limit exceeded");
             curList.add(p);
         }
     }
@@ -30,7 +31,7 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
     public void addAllWl(int trainId, List<Passenger> passengers) {
         LinkedList<Passenger> curList = wlList.getOrDefault(trainId, new LinkedList<>());
         for (Passenger p : passengers) {
-            if (curList.size() >= wlLimit) break;
+            if (curList.size() >= wlLimit) throw new SeatNotFoundException("WL limit exceeded");
             curList.add(p);
         }
     }

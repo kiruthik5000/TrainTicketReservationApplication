@@ -212,8 +212,8 @@ public class BookingService {
         if (fromSeq == null || toSeq == null) return result;
 
         for (Map.Entry<Integer, Integer> e : fromSeq.entrySet()) {
-            Integer toNo = toSeq.get(e.getKey());             // same train stops at 'to'?
-            if (toNo != null && e.getValue() < toNo) {        // and in the right direction
+            Integer toNo = toSeq.get(e.getKey());
+            if (toNo != null && e.getValue() < toNo) {
                 result.add(e.getKey());
             }
         }
