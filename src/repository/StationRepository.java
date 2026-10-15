@@ -3,9 +3,10 @@ package repository;
 import model.Station;
 
 import java.util.List;
+import java.util.Map;
 
 public interface StationRepository {
     int getSequenceNo(String stationCode);
     Station getStationByCode(String stationCode);
-    List<Integer> findTrains(Station from, Station to);
+    Map<Integer, Integer> getTrainSequences(Station station);
 }

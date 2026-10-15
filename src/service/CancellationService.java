@@ -150,39 +150,33 @@ public class CancellationService {
             return;
         }
 
-        int racCnt = waitingListRepository.getNumberOfRac(trainId);
-        int seatProcess = Math.min(racCnt, cnfReleasedCnt);
-
         List<PassengerSeatIdDto> cnfDtos = new ArrayList<>();
         List<Integer> racRemove = new ArrayList<>();
         List<Integer> wlRemove = new ArrayList<>();
 
         Map<Integer, Integer> pendingMasks = new LinkedHashMap<>();
 
-        if (seatProcess > 0) {
-            List<Passenger> racPassengers = waitingListRepository.getRacPassengers(trainId, seatProcess);
-            for (Passenger p : racPassengers) {
+        int racCnt = waitingListRepository.getNumberOfRac(trainId);
+        if (racCnt > 0) {
+            for (Passenger p : waitingListRepository.getRacPassengers(trainId, racCnt)) {
                 Integer seatId = allocateSeat(trainId, getPassengerMask(p), pendingMasks);
-                if (seatId == null) {
-                    continue; // no compatible seat for this passenger's journey, try the next one
-                }
+                if (seatId == null) continue;   // doesn't fit anywhere, try next
                 racRemove.add(p.getPassengerId());
                 cnfDtos.add(new PassengerSeatIdDto(p.getPassengerId(), seatId));
             }
         }
 
-        int remainingSeats = cnfReleasedCnt - cnfDtos.size();
-        if (remainingSeats > 0) {
-            List<Passenger> wlPassengers = waitingListRepository.getWlPassengers(trainId, remainingSeats);
-            for (Passenger p : wlPassengers) {
+        // 2. Then ALL WL passengers into whatever gaps remain
+        int wlCnt = waitingListRepository.getNumberOfWl(trainId); // add if you don't have it
+        if (wlCnt > 0) {
+            for (Passenger p : waitingListRepository.getWlPassengers(trainId, wlCnt)) {
                 Integer seatId = allocateSeat(trainId, getPassengerMask(p), pendingMasks);
-                if (seatId == null) {
-                    continue;
-                }
+                if (seatId == null) continue;
                 wlRemove.add(p.getPassengerId());
                 cnfDtos.add(new PassengerSeatIdDto(p.getPassengerId(), seatId));
             }
         }
+
         if (!racRemove.isEmpty()) {
             waitingListRepository.removeAllRacPassenger(racRemove, trainId);
         }

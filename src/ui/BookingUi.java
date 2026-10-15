@@ -67,12 +67,17 @@ public class BookingUi {
                     System.out.println(p);
                 }
                 System.out.println();
-                String cnf = InputHandler.getStringValue("Confirm booking [y / n]");
-                if (cnf.equals("y")) {
-                    BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), fromStation, toStation, passengersList);
-                    System.out.println(responseDto);
-                } else {
-                    return;
+                while (true) {
+                    String cnf = InputHandler.getStringValue("Confirm booking [y / n]");
+                    if (cnf.equals("y")) {
+                        BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), fromStation, toStation, passengersList);
+                        System.out.println(responseDto);
+                        break;
+                    } else if (cnf.equals("n")) {
+                        break;
+                    } else  {
+                        System.out.println("Wrong Input Try Again!");
+                    }
                 }
                 break;
             }catch (InvalidInputException | SeatNotFoundException e) {
@@ -90,7 +95,8 @@ public class BookingUi {
             System.out.println((i + 1)+". pnr: "+curBooking.getPnr()+"\t"+curBooking.getFrom()+" - "+curBooking.getTo()+"\t"+curBooking.getStatus());
         }
         System.out.println();
-        int choice = InputHandler.getNumericValue("Booking Index to show passenger details", bookings.size());
+        int choice = InputHandler.getNumericValue("Booking Index to show passenger details or 0 for back", bookings.size());
+        if (choice == 0) return;
         BookingResponseDto selectedBooking = bookingService.getBookingDetails(bookings.get(choice - 1).getPnr());
         System.out.println(selectedBooking);
     }

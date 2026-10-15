@@ -46,20 +46,8 @@ public class InMemoryStationRepository implements StationRepository {
     }
 
     @Override
-    public List<Integer> findTrains(Station from, Station to) {
-        List<Integer> result = new ArrayList<>();
-        if (from == null || to == null) return result;
-
-        Map<Integer, Integer> fromSeq = stationTrainSequenceMap.get(from.getStationCode());
-        Map<Integer, Integer> toSeq = stationTrainSequenceMap.get(to.getStationCode());
-        if (fromSeq == null || toSeq == null) return result;
-
-        for (Map.Entry<Integer, Integer> e : fromSeq.entrySet()) {
-            Integer toNo = toSeq.get(e.getKey());             // same train stops at 'to'?
-            if (toNo != null && e.getValue() < toNo) {        // and in the right direction
-                result.add(e.getKey());
-            }
-        }
-        return result;
+    public Map<Integer, Integer> getTrainSequences(Station station) {
+        if (station == null) return new ConcurrentHashMap<>();
+        return stationTrainSequenceMap.get(station.getStationCode());
     }
 }

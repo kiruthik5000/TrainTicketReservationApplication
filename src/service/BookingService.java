@@ -11,6 +11,7 @@ import utils.SessionStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class BookingService {
 
@@ -38,8 +39,8 @@ public class BookingService {
     public List<TrainResponseDto> getAllTrains(Station from, Station to) throws DataBaseException {
 //        if (from.getSequenceNo() >= to.getSequenceNo()) throw new IllegalArgumentException("No Trains Operating through this route");
 //        List<Train> trains = trainRepository.getAllTrains();
-        List<Integer> trainIds = stationRepository.findTrains(from, to);
-        if (trainIds == null || trainIds.isEmpty()) throw new IllegalArgumentException("No Trains Operating through this route");
+        List<Integer> trainIds = findTrains(from, to);
+        if (trainIds.isEmpty()) throw new IllegalArgumentException("No Trains Operating through this route");
         List<TrainResponseDto> trainResponse = new ArrayList<>();
         for (int id : trainIds) {
             Train curTrain = trainRepository.getTrainById(id);
@@ -200,5 +201,22 @@ public class BookingService {
             mask |= (1L << (i - 1));
         }
         return (int) mask;
+    }
+
+    private List<Integer> findTrains(Station from, Station to) {
+        List<Integer> result = new ArrayList<>();
+        if (from == null || to == null) return result;
+
+        Map<Integer, Integer> fromSeq = stationRepository.getTrainSequences(from);
+        Map<Integer, Integer> toSeq = stationRepository.getTrainSequences(to);
+        if (fromSeq == null || toSeq == null) return result;
+
+        for (Map.Entry<Integer, Integer> e : fromSeq.entrySet()) {
+            Integer toNo = toSeq.get(e.getKey());             // same train stops at 'to'?
+            if (toNo != null && e.getValue() < toNo) {        // and in the right direction
+                result.add(e.getKey());
+            }
+        }
+        return result;
     }
 }
