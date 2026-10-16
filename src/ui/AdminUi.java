@@ -2,6 +2,7 @@ package ui;
 
 import dto.PassengerResponseDto;
 import exception.DataBaseException;
+import exception.InvalidInputException;
 import exception.UnAuthorizedAccessException;
 import model.Train;
 import service.AdminService;
@@ -29,23 +30,35 @@ public class AdminUi {
     public void printPassengerValues(int trainID) throws DataBaseException {
         int curWindow = 0;
         while (true) {
-            List<PassengerResponseDto> passengerResponseDtos = adminService.showAllPassengersInTrain(trainID, curWindow);
-            if (passengerResponseDtos == null) {
-                System.out.println("End of passenger list");
-                return;
-            }
-            System.out.println("Passengers: ");
-            for (PassengerResponseDto p : passengerResponseDtos) {
-                System.out.println(p);
+            if (curWindow >= 0) {
+                List<PassengerResponseDto> passengerResponseDtos = adminService.showAllPassengersInTrain(trainID, curWindow);
+                if (passengerResponseDtos != null) {
+
+                    System.out.println("Passengers: ");
+                    for (PassengerResponseDto p : passengerResponseDtos) {
+                        System.out.println(p);
+                    }
+                } else {
+                    System.out.println("End of passenger list");
+                    System.out.println("return to Main Menu");
+                    return;
+                }
             }
             System.out.println("1. show next passengers");
-            System.out.println("2. return");
-
-            int choice = InputHandler.getNumericValue("choice", 2);
-            if (choice == 1) {
-                curWindow ++;
-            } else {
-                return;
+            System.out.println("2. previous list of passengers");
+            System.out.println("3. return");
+            try {
+                int choice = InputHandler.getNumericValue("choice", 3);
+                if (choice == 1) {
+                    curWindow++;
+                } else if (choice == 2) {
+                    curWindow--;
+                    if (curWindow < 0) throw new InvalidInputException("Invalid Operation");
+                } else {
+                    return;
+                }
+            }catch (Exception e) {
+                System.out.println("Error " + e.getMessage());
             }
         }
     }

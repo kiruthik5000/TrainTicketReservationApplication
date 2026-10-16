@@ -44,7 +44,7 @@ public class BookingService {
         List<TrainResponseDto> trainResponse = new ArrayList<>();
         for (int id : trainIds) {
             Train curTrain = trainRepository.getTrainById(id);
-            trainResponse.add(new TrainResponseDto(curTrain, getAvailableSeats(id, from, to)));
+            trainResponse.add(new TrainResponseDto(curTrain, getAvailableSeats(id, from, to), from, to));
         }
         return trainResponse;
     }
