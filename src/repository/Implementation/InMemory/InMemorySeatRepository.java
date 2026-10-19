@@ -2,6 +2,7 @@ package repository.Implementation.InMemory;
 
 import dto.SeatUpdateRequestDto;
 import model.Seat;
+import model.SeatType;
 import model.SeatStatus;
 import repository.SeatRepository;
 
@@ -18,22 +19,28 @@ public class InMemorySeatRepository implements SeatRepository {
         this.seatMap = new ConcurrentHashMap<>();
         this.trainSeatMap = new ConcurrentHashMap<>();
 
-        seatMap.put(1, new Seat(1, 1, 1, SeatStatus.BOOKED));
-        seatMap.put(2, new Seat(2, 2, 1, SeatStatus.AVAILABLE));
-        seatMap.put(3, new Seat(3, 3, 1, SeatStatus.AVAILABLE));
+        seatMap.put(1, new Seat(1, 1, 1, SeatStatus.BOOKED, SeatType.SLEEPER));
+        seatMap.put(2, new Seat(2, 2, 1, SeatStatus.AVAILABLE, SeatType.SLEEPER));
+        seatMap.put(3, new Seat(3, 3, 1, SeatStatus.AVAILABLE, SeatType.SLEEPER));
+        seatMap.put(4, new Seat(4, 1, 1, SeatStatus.AVAILABLE, SeatType.AC));
+        seatMap.put(5, new Seat(5, 2, 1, SeatStatus.AVAILABLE, SeatType.AC));
+        seatMap.put(6, new Seat(6, 3, 1, SeatStatus.AVAILABLE, SeatType.AC));
+
         seatMap.get(1).setMask(new boolean[]{true, false, false});
 
-        trainSeatMap.put(1, new ArrayList<>(List.of(1, 2, 3)));
+        trainSeatMap.put(1, new ArrayList<>(List.of(1, 2, 3, 4, 5, 6)));
     }
 
     @Override
-    public List<Seat> getAvailableSeats(int trainId, int fromSeq, int toSeq) {
+    public List<Seat> getAvailableSeats(int trainId, SeatType sc, int fromSeq, int toSeq) {
         List<Integer> seatIds = trainSeatMap.getOrDefault(trainId, new ArrayList<>());
         List<Seat> availableSeats = new ArrayList<>();
         for (int i : seatIds) {
             Seat curSeat = seatMap.get(i);
-            if (isAvailable(curSeat.getMask(), fromSeq, toSeq)) {
-                availableSeats.add(curSeat);
+            if (curSeat.getSeatType().equals(sc)) {
+                if (isAvailable(curSeat.getMask(), fromSeq, toSeq)) {
+                    availableSeats.add(curSeat);
+                }
             }
         }
         return availableSeats;

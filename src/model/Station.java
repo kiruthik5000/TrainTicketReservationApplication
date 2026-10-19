@@ -9,6 +9,7 @@ public class Station {
     private int sequenceNo;
     private int trainId;
     private LocalTime arrivalTime;
+    private int distance;
 
     public LocalTime getArrivalTime(){return arrivalTime;}
     public int getTrainId() {return trainId;}
@@ -17,12 +18,13 @@ public class Station {
     }
     public int getSequenceNo() {return sequenceNo;}
     private String getStationName() {return stationName;}
-    public Station(int stationId, String stationName, String stationCode, int sequenceNo, int trainId, LocalTime arrivalTime) {
+    public Station(int stationId, String stationName, String stationCode, int sequenceNo, int trainId, LocalTime arrivalTime, int distance) {
         this.stationId = stationId;
         this.stationName = stationName;
         this.stationCode = stationCode;
         this.sequenceNo = sequenceNo;
         this.trainId = trainId;
         this.arrivalTime = arrivalTime;
+        this.distance = distance;
     }
 }

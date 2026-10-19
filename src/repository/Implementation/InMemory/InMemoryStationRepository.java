@@ -17,15 +17,15 @@ public class InMemoryStationRepository implements StationRepository {
         codeStationMap = new ConcurrentHashMap<>();
         stationTrainSequenceMap = new ConcurrentHashMap<>();
 
-        stationMap.put(1, new Station(1, "Tambaram", "A", 1, 1, LocalTime.of(10, 0)));
-        stationMap.put(2, new Station(2, "Central", "B", 2, 1, LocalTime.of(11, 32)));
-        stationMap.put(3, new Station(3, "Trichy", "C", 3, 1, LocalTime.of(13, 42)));
-        stationMap.put(4, new Station(4, "Coimbatore", "D", 4, 1, LocalTime.of(15, 17)));
-        stationMap.put(5, new Station(5, "Tambaram", "A", 1, 2, LocalTime.of(4, 23)));
-        stationMap.put(6, new Station(6, "Central", "B", 2, 2, LocalTime.of(5, 12)));
-        stationMap.put(7, new Station(7, "Trichy", "C", 3, 2, LocalTime.of(7, 16)));
-        stationMap.put(8, new Station(8, "Coimbatore", "D", 4, 2, LocalTime.of(10, 13)));
-        stationMap.put(9, new Station(9, "Madurai", "F", 5, 2, LocalTime.of(12, 20)));
+        stationMap.put(1, new Station(1, "Tambaram", "A", 1, 1, LocalTime.of(10, 0), 50));
+        stationMap.put(2, new Station(2, "Central", "B", 2, 1, LocalTime.of(11, 32), 100));
+        stationMap.put(3, new Station(3, "Trichy", "C", 3, 1, LocalTime.of(13, 42), 150));
+        stationMap.put(4, new Station(4, "Coimbatore", "D", 4, 1, LocalTime.of(15, 17), 200));
+        stationMap.put(5, new Station(5, "Tambaram", "A", 1, 2, LocalTime.of(4, 23), 50));
+        stationMap.put(6, new Station(6, "Central", "B", 2, 2, LocalTime.of(5, 12), 100));
+        stationMap.put(7, new Station(7, "Trichy", "C", 3, 2, LocalTime.of(7, 16), 150));
+        stationMap.put(8, new Station(8, "Coimbatore", "D", 4, 2, LocalTime.of(10, 13), 200));
+        stationMap.put(9, new Station(9, "Madurai", "F", 5, 2, LocalTime.of(12, 20), 250));
 
         for (Map.Entry<Integer, Station> cur : stationMap.entrySet()) {
             codeStationMap.put(cur.getValue().getStationCode(), cur.getKey());

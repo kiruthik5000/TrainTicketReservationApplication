@@ -6,10 +6,11 @@ public class Booking {
     private String from;
     private String to;
     private BookingStatus status;
+    private SeatType seatType;
     private int trainId;
     private int userId;
 
-    public Booking(int bookingId,String pnr, String from, String to, int trainId, int userId, BookingStatus status) {
+    public Booking(int bookingId,String pnr, String from, String to, int trainId, int userId, BookingStatus status, SeatType seatType) {
         this.bookingId = bookingId;
         this.pnr = pnr;
         this.from = from;
@@ -17,6 +18,7 @@ public class Booking {
         this.trainId = trainId;
         this.userId = userId;
         this.status = status;
+        this.seatType = seatType;
     }
     public int getBookingId() {return bookingId;}
     public String getPnr() {
@@ -40,6 +42,7 @@ public class Booking {
     }
 
     public BookingStatus getStatus() {return status;}
+    public SeatType getSeatType() {return seatType;}
 
     public void setStatus(BookingStatus status) {
         this.status = status;

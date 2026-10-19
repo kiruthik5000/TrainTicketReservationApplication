@@ -26,13 +26,13 @@ public class MainMenuUi {
             System.out.println("4. Cancel Tickets");
             System.out.println("5. Show Bookings");
             System.out.println("6. Show All Passengers in Train");
+            System.out.println("7. Show Booking Details By PNR");
             if (SessionStorage.getCurrentUser() != null) {
-                System.out.println("7. Logout");
+                System.out.println("8. Logout");
             } else {
-                System.out.println("7. Exit");
+                System.out.println("8. Exit");
             }
-
-            int choice = InputHandler.getNumericValue("choice", 7);
+            int choice = InputHandler.getNumericValue("choice", 8);
 
             switch (choice) {
                 case 1:
@@ -54,6 +54,9 @@ public class MainMenuUi {
                     showAllPassengersInTrain();
                     break;
                 case 7:
+                    getBookingDetailsByPnr();
+                    break;
+                case 8:
                     if (exit()) break;
                     return;
                 default:
@@ -121,6 +124,13 @@ public class MainMenuUi {
     private void showAllPassengersInTrain() {
         try {
             adminUI.showAllPassengersInTrain();
+        } catch (Exception e) {
+            System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
+        }
+    }
+    private void getBookingDetailsByPnr() {
+        try {
+            bookingUi.getBookingDetailsByPNR();
         } catch (Exception e) {
             System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
         }

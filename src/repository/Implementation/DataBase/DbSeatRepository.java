@@ -3,6 +3,7 @@ package repository.Implementation.DataBase;
 import dto.SeatUpdateRequestDto;
 import exception.DataBaseException;
 import model.Seat;
+import model.SeatType;
 import model.SeatStatus;
 import repository.SeatRepository;
 import utils.DbUtils;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class DbSeatRepository implements SeatRepository {
     @Override
-    public List<Seat> getAvailableSeats(int trainId, int from, int to) throws DataBaseException {
+    public List<Seat> getAvailableSeats(int trainId, SeatType sc, int from, int to) throws DataBaseException {
         String query = "SELECT * FROM seat WHERE trainId = ? AND status = 'AVAILABLE';";
 
         try (
@@ -32,7 +33,8 @@ public class DbSeatRepository implements SeatRepository {
                                 rs.getInt("seatId"),
                                 rs.getInt("seatNo"),
                                 rs.getInt("trainId"),
-                                SeatStatus.valueOf(rs.getString("status"))
+                                SeatStatus.valueOf(rs.getString("status")),
+                                SeatType.SLEEPER
                         )
                 );
             }
@@ -55,7 +57,8 @@ public class DbSeatRepository implements SeatRepository {
                         rs.getInt("seatId"),
                         rs.getInt("seatNo"),
                         rs.getInt("trainId"),
-                        SeatStatus.valueOf(rs.getString("status"))
+                        SeatStatus.valueOf(rs.getString("status")),
+                        SeatType.SLEEPER
                 );
             }
             return null;

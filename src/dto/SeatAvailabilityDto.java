@@ -1,21 +1,26 @@
 package dto;
 
+import model.SeatType;
+
 public class SeatAvailabilityDto {
-    private String seatClass;
+    private SeatType seatType;
+    private String availabilityStatus;
     private int availability;
 
-    public SeatAvailabilityDto(String seatClass, int availability) {
-        this.seatClass = seatClass;
+    public SeatAvailabilityDto(SeatType seatType, String seatClass, int availability) {
+        this.seatType = seatType;
+        this.availabilityStatus = seatClass;
         this.availability = availability;
     }
 
-    public String getSeatClass() {
-        return seatClass;
+    public String getAvailabilityStatus() {
+        return availabilityStatus;
     }
+    public SeatType getSeatType() {return seatType;}
 
     @Override
     public String toString() {
-        if (seatClass.equals("REGRET")) return "Regret No more seats left";
-        return "Available "+seatClass+" : "+availability;
+        if (availabilityStatus.equals("REGRET")) return "Regret No more seats left";
+        return seatType+" : "+ " Available "+availabilityStatus+" : "+availability;
     }
 }

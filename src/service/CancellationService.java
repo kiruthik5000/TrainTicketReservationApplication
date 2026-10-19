@@ -35,7 +35,7 @@ public class CancellationService {
 
         int cnfReleased = cancelPassengers(passengers, booking.getTrainId(), fromSeq, toSeq);
 
-        promoteRacToCnfSeats(booking.getTrainId(), cnfReleased, fromSeq, toSeq);
+        promoteRacToCnfSeats(booking, cnfReleased, fromSeq, toSeq);
 
         bookingRepository.updateStatus(booking.getBookingId(), BookingStatus.CANCELLED);
         return true;
@@ -58,7 +58,7 @@ public class CancellationService {
             }
         }
         int cancelled = cancelPassengers(toCancelPassengers, booking.getTrainId(), fromSeq, toSeq);
-        promoteRacToCnfSeats(booking.getTrainId(), cancelled, fromSeq, toSeq);
+        promoteRacToCnfSeats(booking, cancelled, fromSeq, toSeq);
         if (checkAllPassengersAreRemoved(pnr)) {
             bookingRepository.updateStatus(booking.getBookingId(), BookingStatus.CANCELLED);
         }
@@ -143,7 +143,8 @@ public class CancellationService {
         }
     }
 
-    private void promoteRacToCnfSeats(int trainId, int cnfReleasedCnt, int fromSeq, int toSeq) throws DataBaseException {
+    private void promoteRacToCnfSeats(Booking booking, int cnfReleasedCnt, int fromSeq, int toSeq) throws DataBaseException {
+        int trainId = booking.getTrainId();
         if (cnfReleasedCnt <= 0) {
             promoteWlToRac(trainId);
             return;
@@ -158,7 +159,7 @@ public class CancellationService {
         int racCnt = waitingListRepository.getNumberOfRac(trainId);
         if (racCnt > 0) {
             for (Passenger p : waitingListRepository.getRacPassengers(trainId, racCnt)) {
-                Integer seatId = allocateSeat(trainId, fromSeq, toSeq, pendingMasks);
+                Integer seatId = allocateSeat(booking, fromSeq, toSeq, pendingMasks);
                 if (seatId == null) continue;
                 racRemove.add(p.getPassengerId());
                 cnfDtos.add(new PassengerSeatIdDto(p.getPassengerId(), seatId));
@@ -169,7 +170,7 @@ public class CancellationService {
         int wlCnt = waitingListRepository.getNumberOfWl(trainId); // add if you don't have it
         if (wlCnt > 0) {
             for (Passenger p : waitingListRepository.getWlPassengers(trainId, wlCnt)) {
-                Integer seatId = allocateSeat(trainId, fromSeq, toSeq, pendingMasks);
+                Integer seatId = allocateSeat(booking, fromSeq, toSeq, pendingMasks);
                 if (seatId == null) continue;
                 wlRemove.add(p.getPassengerId());
                 cnfDtos.add(new PassengerSeatIdDto(p.getPassengerId(), seatId));
@@ -193,8 +194,8 @@ public class CancellationService {
 
         promoteWlToRac(trainId);
     }
-    private Integer allocateSeat(int trainId, int fromSeq, int toSeq, Map<Integer, boolean[]> pendingMasks) throws DataBaseException {
-        List<Seat> candidates = seatRepository.getAvailableSeats(trainId, fromSeq, toSeq);
+    private Integer allocateSeat(Booking booking, int fromSeq, int toSeq, Map<Integer, boolean[]> pendingMasks) throws DataBaseException {
+        List<Seat> candidates = seatRepository.getAvailableSeats(booking.getTrainId(), booking.getSeatType(), fromSeq, toSeq);
         for (Seat seat : candidates) {
             boolean[] currentMask = pendingMasks.getOrDefault(seat.getSeatId(), seat.getMask());
             boolean canAllocate = true;

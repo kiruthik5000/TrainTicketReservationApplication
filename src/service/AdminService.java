@@ -28,11 +28,13 @@ public class AdminService {
         return trainRepository.getAllTrains();
     }
 
-    public List<PassengerResponseDto> showAllPassengersInTrain(int trainId, int window) throws DataBaseException {
+    public List<PassengerResponseDto> showAllPassengersInTrain(SeatType seatType, int trainId, int window) throws DataBaseException {
         List<Booking> bookings = bookingRepository.getAllBookingsByTrainId(trainId);
         List<Passenger> passengers = new ArrayList<>();
         for (Booking b : bookings) {
-            passengers.addAll(passengerRepository.getPassengerByBookingPnr(b.getPnr()));
+            if (b.getSeatType().equals(seatType)) {
+                passengers.addAll(passengerRepository.getPassengerByBookingPnr(b.getPnr()));
+            }
         }
         List<PassengerResponseDto> passengerResponse = new ArrayList<>();
         for (Passenger p : passengers) {

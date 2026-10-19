@@ -2,8 +2,8 @@ package ui;
 
 import dto.PassengerResponseDto;
 import exception.DataBaseException;
-import exception.InvalidInputException;
 import exception.UnAuthorizedAccessException;
+import model.SeatType;
 import model.Train;
 import service.AdminService;
 import utils.InputHandler;
@@ -25,47 +25,70 @@ public class AdminUi {
             System.out.println((i + 1) +". "+ trainList.get(i));
         }
         int choice = InputHandler.getNumericValue("Train Index", trainList.size());
-        printPassengerValues(trainList.get(choice - 1).getTrainId());
-    }
-    public void printPassengerValues(int trainID) throws DataBaseException {
-        int curWindow = 0;
-        int curIdx = 0;
+        List<SeatType> types = List.of(SeatType.AC, SeatType.SLEEPER);
         while (true) {
-            if (curWindow >= 0) {
-                List<PassengerResponseDto> passengerResponseDtos = adminService.showAllPassengersInTrain(trainID, curWindow);
-                if (passengerResponseDtos != null) {
-                    curIdx = 0;
-                    System.out.println("Passengers: ");
-                    for (PassengerResponseDto p : passengerResponseDtos) {
-                        System.out.println(p);
-                    }
-                } else {
-                    System.out.println("End of passenger list");
-                    curIdx = 1;
+            try {
+                for (int i=0; i<types.size(); i++) {
+                    System.out.println((i + 1)+". "+types.get(i));
                 }
+                System.out.println((types.size() + 1)+". Return to Main Menu");
+                System.out.println();
+                int seatType = InputHandler.getNumericValue("Seat Type", types.size());
+                if (seatType == types.size() + 1) return;
+                printPassengerValues(types.get(seatType - 1), trainList.get(choice - 1).getTrainId());
+            } catch (Exception e) {
+                System.out.println("Error Occurred"+e.getMessage());
             }
-            if (curIdx < 1) {
-                System.out.println("\n\n1. show next passengers");
+        }
+    }
+    public void printPassengerValues(SeatType seatType, int trainID) throws DataBaseException {
+        int curWindow = 0;
+        boolean hasNext;
+
+        while (true) {
+            List<PassengerResponseDto> passengerResponseDtos = adminService.showAllPassengersInTrain(seatType, trainID, curWindow);
+
+            if (passengerResponseDtos != null && !passengerResponseDtos.isEmpty()) {
+                System.out.println("\nPassengers: ");
+                for (PassengerResponseDto p : passengerResponseDtos) {
+                    System.out.println(p);
+                }
+                hasNext = true;
+            } else {
+                System.out.println("\nEnd of passenger list.");
+                hasNext = false;
             }
-            if (curIdx > -1) {
-                System.out.println("2. previous list of passengers");
+
+            if (hasNext) {
+                System.out.println("1. Show next passengers");
             }
-            System.out.println("3. return");
+            if (curWindow > 0) {
+                System.out.println("2. Previous list of passengers");
+            }
+            System.out.println("3. Return");
+
             try {
                 int choice = InputHandler.getNumericValue("choice", 3);
+
                 if (choice == 1) {
-                    curWindow++;
-                } else if (choice == 2) {
-                    curWindow--;
-                    if (curWindow < 0) {
-                        curIdx = -1;
-                        throw new InvalidInputException("Invalid Operation");
+                    if (hasNext) {
+                        curWindow++;
+                    } else {
+                        System.out.println("Invalid Operation: Already at the end.");
                     }
-                } else {
+                } else if (choice == 2) {
+                    if (curWindow > 0) {
+                        curWindow--;
+                    } else {
+                        System.out.println("Invalid Operation: Already at the beginning.");
+                    }
+                } else if (choice == 3) {
                     return;
+                } else {
+                    System.out.println("Invalid Input.");
                 }
-            }catch (Exception e) {
-                System.out.println("Error " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
             }
         }
     }

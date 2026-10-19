@@ -8,6 +8,7 @@ import exception.InvalidInputException;
 import exception.ItemNotFoundException;
 import exception.SeatNotFoundException;
 import model.Booking;
+import model.SeatType;
 import model.Station;
 import model.Train;
 import service.BookingService;
@@ -26,14 +27,8 @@ public class BookingUi {
 
     public void bookTickets() throws Exception {
         if (!SessionStorage.userIsLoggedIn()) return;
-        String from = InputHandler.getStringValue("Departure Station code");
-        Station fromStation = bookingService.getStation(from);
-
-        if (fromStation == null) throw new ItemNotFoundException("Invalid Departure Station Code");
-        String to = InputHandler.getStringValue("Arrival Station code");
-        Station toStation = bookingService.getStation(to);
-
-        if (toStation == null) throw new ItemNotFoundException("Invalid Arrival Station code");
+        Station fromStation = getStation("Departure Station code");
+        Station toStation = getStation("Arrival Station code");
 
         List<TrainResponseDto> trainList = bookingService.getAllTrains(fromStation, toStation);
 
@@ -41,7 +36,7 @@ public class BookingUi {
 
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1)+". "+trainList.get(i));
-            System.out.println();
+            System.out.println("-----------------------");
         }
         System.out.println((trainList.size() + 1)+". Back to Main Menu");
         System.out.println();
@@ -51,14 +46,22 @@ public class BookingUi {
             return;
         }
         TrainResponseDto selectedTrain = trainList.get(choice - 1);
+        for (int i=0; i<selectedTrain.getSeatAvailabilityDto().size(); i++) {
+            System.out.println((i + 1)+". "+selectedTrain.getSeatAvailabilityDto().get(i));
+            System.out.println();
+        }
+        int seatChoice = InputHandler.getNumericValue("Seat Choice", selectedTrain.getSeatAvailabilityDto().size());
         Train curTrain = selectedTrain.getTrain();
-        if (selectedTrain.getSeatAvailabilityDto().getSeatClass().equals("REGRET")) throw new SeatNotFoundException("No seats found for this train");
+        SeatType seatType = selectedTrain.getSeatAvailabilityDto().get(seatChoice - 1).getSeatType();
+        if (selectedTrain.getSeatAvailabilityDto().get(seatChoice - 1).getAvailabilityStatus().equals("REGRET")) throw new SeatNotFoundException("No seats found for this train");
         while (true) {
             try {
                 System.out.println("------------------------");
-                System.out.println(selectedTrain);
-
+                System.out.println(selectedTrain.onlyTrain());
+                System.out.println("\n"+selectedTrain.getSeatAvailabilityDto().get(seatChoice - 1));
+                System.out.println();
                 List<PassengerRequestDto> passengersList = gatherPassengers();
+
 
                 if (passengersList == null || passengersList.isEmpty()) return;
 
@@ -70,7 +73,7 @@ public class BookingUi {
                 while (true) {
                     String cnf = InputHandler.getStringValue("Confirm booking [y / n]");
                     if (cnf.equals("y")) {
-                        BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), fromStation, toStation, passengersList);
+                        BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), seatType, fromStation, toStation, passengersList);
                         System.out.println(responseDto);
                         break;
                     } else if (cnf.equals("n")) {
@@ -128,5 +131,30 @@ public class BookingUi {
         }
         System.out.println("Only 6 passengers can book in 1 Booking");
         return passengerList;
+    }
+
+    public void getBookingDetailsByPNR() {
+        String pnr = InputHandler.getStringValue("pnr No");
+        try {
+            BookingResponseDto booking = bookingService.getBookingDetails(pnr.trim());
+            if (booking != null) {
+                System.out.println(booking);
+            }
+        } catch (Exception e) {
+            System.out.println("Error Occurred "+e.getMessage());
+        }
+    }
+
+    private Station getStation(String label) {
+        while (true) {
+            try {
+                String stationCode = InputHandler.getStringValue(label);
+                Station s = bookingService.getStation(stationCode);
+                if (s == null) throw new InvalidInputException("Invalid "+label);
+                return s;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@ package repository.Implementation.InMemory;
 
 import model.Booking;
 import model.BookingStatus;
+import model.SeatType;
 import repository.BookingRepository;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class InMemoryBookingRepository implements BookingRepository {
         this.bookingMap = new ConcurrentHashMap<>();
 
         pnrBookingMap.put("123456789", 1);
-        bookingMap.put(1, new Booking(1, "123456789", "A", "B", 1, 1, BookingStatus.ACTIVE));
+        bookingMap.put(1, new Booking(1, "123456789", "A", "B", 1, 1, BookingStatus.ACTIVE, SeatType.SLEEPER));
         userBookingMap.put(1, new ArrayList<>(List.of(1)));
     }
 

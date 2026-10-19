@@ -3,6 +3,7 @@ package repository.Implementation.DataBase;
 import exception.DataBaseException;
 import model.Booking;
 import model.BookingStatus;
+import model.SeatType;
 import repository.BookingRepository;
 import utils.DbUtils;
 
@@ -51,7 +52,7 @@ public class DbBookingRepository implements BookingRepository {
                         rs.getInt("trainId"),
                         rs.getInt("userId"),
                         BookingStatus.valueOf(rs.getString("status")
-                        ));
+                        ), SeatType.SLEEPER);
             }
         } catch (Exception e) {
             throw new DataBaseException(e.getMessage());
@@ -91,8 +92,8 @@ public class DbBookingRepository implements BookingRepository {
                         rs.getString("toStation"),
                         rs.getInt("trainId"),
                         rs.getInt("userId"),
-                        BookingStatus.valueOf(rs.getString("status"))
-                ));
+                        BookingStatus.valueOf(rs.getString("status")),
+                         SeatType.SLEEPER));
             }
             return bookingList;
 

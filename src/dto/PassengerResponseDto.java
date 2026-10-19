@@ -26,6 +26,7 @@ public class PassengerResponseDto {
     }
     @Override
     public String toString() {
-        return "name: "+name+", age:"+age+"\t"+status.name()+" "+(seatNo != -1 ? seatNo : "null")+" "+from+" - "+to;
+
+        return "name: "+name+", age:"+age+"\t"+status.name()+" "+(status.equals(PassengerStatus.CANCELLED) ? "Cancelled" :(seatNo != -1 ? seatNo : "null"))+" "+from+" - "+to;
     }
 }

@@ -6,13 +6,15 @@ public class Seat {
     private SeatStatus status;
     private boolean[] booked;
     private int trainId;
+    private SeatType seatType;
 
-    public Seat(int seatId, int seatNo, int trainId, SeatStatus status) {
+    public Seat(int seatId, int seatNo, int trainId, SeatStatus status, SeatType seatType) {
         this.seatId = seatId;
         this.status = status;
         this.seatNo = seatNo;
         this.trainId = trainId;
         this.booked = new boolean[3];
+        this.seatType = seatType;
     }
 
     public boolean[] getMask() {return booked;}
@@ -36,5 +38,5 @@ public class Seat {
         this.status = status;
     }
     public void setMask(boolean[] curBooked) {this.booked = curBooked;}
-
+    public SeatType getSeatType() { return this.seatType;}
 }

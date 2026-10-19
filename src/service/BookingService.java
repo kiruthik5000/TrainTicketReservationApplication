@@ -9,9 +9,7 @@ import model.*;
 import repository.*;
 import utils.SessionStorage;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BookingService {
 
@@ -38,7 +36,7 @@ public class BookingService {
 
     public List<TrainResponseDto> getAllTrains(Station from, Station to) throws DataBaseException {
         List<Integer> trainIds = findTrains(from, to);
-        if (trainIds.isEmpty()) throw new IllegalArgumentException("No Trains Operating through this route");
+        if (trainIds.isEmpty()) throw new ItemNotFoundException("No Trains Operating through this route");
         List<TrainResponseDto> trainResponse = new ArrayList<>();
         for (int id : trainIds) {
             Train curTrain = trainRepository.getTrainById(id);
@@ -47,22 +45,20 @@ public class BookingService {
         return trainResponse;
     }
 
-    public SeatAvailabilityDto getAvailableSeats(int trainId, Station from, Station to) throws DataBaseException {
-        int cnfSeats = seatRepository.getAvailableSeats(trainId, from.getSequenceNo(), to.getSequenceNo()).size();
-        if (cnfSeats > 0) return new SeatAvailabilityDto("CNF", cnfSeats);
-        int racNo = waitingListRepository.getAvailableRac(trainId);
-        if (racNo > 0) return new SeatAvailabilityDto("RAC ", racNo);
-        int wlNo = waitingListRepository.getAvailableWl(trainId);
-        if (wlNo > 0) return new SeatAvailabilityDto("WL ", wlNo);
-        return new SeatAvailabilityDto("REGRET", -1);
+    public List<SeatAvailabilityDto> getAvailableSeats(int trainId, Station from, Station to) throws DataBaseException {
+        List<SeatAvailabilityDto> availabilityDtos = new ArrayList<>();
+        for (SeatType e : new SeatType[]{SeatType.SLEEPER, SeatType.AC}) {
+            availabilityDtos.add(getAvailableSeats(trainId, e, from, to));
+        }
+        return availabilityDtos;
     }
 
-    public BookingResponseDto bookTickets(int trainId, Station from, Station to, List<PassengerRequestDto> passengers) throws DataBaseException {
+    public BookingResponseDto bookTickets(int trainId, SeatType sc, Station from, Station to, List<PassengerRequestDto> passengers) throws DataBaseException {
 
         if (passengers == null || passengers.isEmpty()) throw new InvalidInputException("No Passengers Provided");
 
 
-        List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId, from.getSequenceNo(), to.getSequenceNo());
+        List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId, sc, from.getSequenceNo(), to.getSequenceNo());
         int totalPassengers = passengers.size();
         int cnfAvail = availableSeats.size();
         int cnfCnt = Math.min(cnfAvail, totalPassengers);
@@ -74,7 +70,7 @@ public class BookingService {
         if (passengers.size() > currentCanBook) throw new SeatNotFoundException("Only "+currentCanBook+" Seats left please Enter "+currentCanBook+" passengers.");
 
         String pnr = generatePNR();
-        Booking currentBooking = new Booking(0, pnr, from.getStationCode(), to.getStationCode(), trainId, SessionStorage.getCurrentUser().getUserId(), BookingStatus.ACTIVE);
+        Booking currentBooking = new Booking(0, pnr, from.getStationCode(), to.getStationCode(), trainId, SessionStorage.getCurrentUser().getUserId(), BookingStatus.ACTIVE, sc);
         bookingRepository.addBooking(currentBooking);
 
         List<Passenger> selectedPassengers = new ArrayList<>();
@@ -89,7 +85,7 @@ public class BookingService {
 
 //             seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
              Passenger cnfPassenger = new Passenger(0, curPassenger.getName(), curPassenger.getAge(), PassengerStatus.CNF, pnr, curSeat.getSeatId());
-             seatUpdateRequestDtos.add(new SeatUpdateRequestDto(curSeat.getSeatId(), curBooking));
+             seatUpdateRequestDtos.add(new SeatUpdateRequestDto(curSeat.getSeatId(), curBooking.clone()));
 //             passengerRepository.addPassenger(cnfPassenger);
              selectedPassengers.add(cnfPassenger);
          }
@@ -115,7 +111,7 @@ public class BookingService {
         }
 
          List<PassengerResponseDto> addedPassengers = gatherPassengerDetails(currentBooking, trainId);
-         return new BookingResponseDto(pnr, from.getStationCode(), to.getStationCode(), trainRepository.getTrainById(trainId), addedPassengers.size(), addedPassengers, currentBooking.getStatus());
+         return new BookingResponseDto(pnr, trainRepository.getTrainById(trainId), addedPassengers.size(), addedPassengers, currentBooking.getStatus(), sc);
     }
 
     public List<Booking> getAllBookings() throws DataBaseException {
@@ -125,11 +121,11 @@ public class BookingService {
     public BookingResponseDto getBookingDetails(String pnr) throws DataBaseException {
         Booking curBooking = bookingRepository.getBookingByPnr(pnr);
         if (curBooking == null) throw new ItemNotFoundException("No bookings found for this Account");
-        if (curBooking.getStatus().equals(BookingStatus.CANCELLED)) throw new IllegalArgumentException("This booking is cancelled");
+//        if (curBooking.getStatus().equals(BookingStatus.CANCELLED)) throw new IllegalArgumentException("This booking is canceled");
         Train curTrain = trainRepository.getTrainById(curBooking.getTrainId());
         if (curTrain == null) throw new ItemNotFoundException("No Train found for this trainId"+curBooking.getTrainId());
         List<PassengerResponseDto> curPassengers = gatherPassengerDetails(curBooking, curTrain.getTrainId());
-        return new BookingResponseDto(pnr, curBooking.getFrom(), curBooking.getTo(), curTrain, curPassengers.size(), curPassengers, curBooking.getStatus());
+        return new BookingResponseDto(pnr, curTrain, curPassengers.size(), curPassengers, curBooking.getStatus(), curBooking.getSeatType());
     }
 
     private List<Passenger> updateWaitingQueue(int index, List<PassengerRequestDto> passengers, String pnr, int racAvail, int wlAvail) {
@@ -163,7 +159,7 @@ public class BookingService {
         List<PassengerResponseDto> passengerResponseDtos = new ArrayList<>();
         for (Passenger p : passengers) {
 //            System.out.println("current passenger status"+p.getStatus());
-            if (p.getStatus() == PassengerStatus.CANCELLED) continue;
+//            if (p.getStatus() == PassengerStatus.CANCELLED) continue;
             int seatNo;
             if (p.getStatus() == PassengerStatus.CNF){
                 seatNo = seatRepository.getSeatById(p.getSeatId()).getSeatNo();
@@ -209,5 +205,16 @@ public class BookingService {
             }
         }
         return result;
+    }
+    public SeatAvailabilityDto getAvailableSeats(int trainId, SeatType sc, Station from, Station to) throws DataBaseException {
+        int cnf = seatRepository.getAvailableSeats(trainId, sc, from.getSequenceNo(), to.getSequenceNo()).size();
+        int rac = waitingListRepository.getAvailableRac(trainId);
+        int wl  = waitingListRepository.getAvailableWl(trainId);
+
+        if (cnf > 0) return new SeatAvailabilityDto(sc, "CNF", cnf);
+        if (rac > 0) return new SeatAvailabilityDto(sc,"RAC", rac);
+        if (wl  > 0) return new SeatAvailabilityDto(sc,"WL", wl);
+        if (rac == -1 && wl == -1) return null;        // train doesn't offer this class
+        return new SeatAvailabilityDto(sc,"REGRET", -1);
     }
 }
