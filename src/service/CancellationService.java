@@ -28,13 +28,14 @@ public class CancellationService {
     public boolean cancelFullBooking(String pnr) throws DataBaseException {
 
         Booking booking = bookingRepository.getBookingByPnr(pnr);
-        int mask = calculateMask(stationRepository.getSequenceNo(booking.getFrom()), stationRepository.getSequenceNo(booking.getTo()));
+        int fromSeq = stationRepository.getSequenceNo(booking.getFrom());
+        int toSeq = stationRepository.getSequenceNo(booking.getTo());
         List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(pnr);
         if (passengers == null || passengers.isEmpty()) throw new ItemNotFoundException("No Passenger found");
 
-        int cnfReleased = cancelPassengers(passengers, booking.getTrainId(), mask);
+        int cnfReleased = cancelPassengers(passengers, booking.getTrainId(), fromSeq, toSeq);
 
-        promoteRacToCnfSeats(booking.getTrainId(), cnfReleased);
+        promoteRacToCnfSeats(booking.getTrainId(), cnfReleased, fromSeq, toSeq);
 
         bookingRepository.updateStatus(booking.getBookingId(), BookingStatus.CANCELLED);
         return true;
@@ -43,7 +44,8 @@ public class CancellationService {
     public boolean partialCancellation(String pnr, Set<Integer> selectedPassengers) throws DataBaseException {
         Booking booking = bookingRepository.getBookingByPnr(pnr);
         if (booking == null) throw new InvalidInputException("No booking found for this PNR");
-        int mask = calculateMask(stationRepository.getSequenceNo(booking.getFrom()), stationRepository.getSequenceNo(booking.getTo()));
+        int fromSeq = stationRepository.getSequenceNo(booking.getFrom());
+        int toSeq = stationRepository.getSequenceNo(booking.getTo());
         if (selectedPassengers == null || selectedPassengers.isEmpty()) { throw new InvalidInputException( "Select at least one passenger" ); }
 
         List<Passenger> passengers = passengerRepository.getPassengerByBookingPnr(pnr);
@@ -55,15 +57,15 @@ public class CancellationService {
                 toCancelPassengers.add(p);
             }
         }
-        int cancelled = cancelPassengers(toCancelPassengers, booking.getTrainId(), mask);
-        promoteRacToCnfSeats(booking.getTrainId(), cancelled);
+        int cancelled = cancelPassengers(toCancelPassengers, booking.getTrainId(), fromSeq, toSeq);
+        promoteRacToCnfSeats(booking.getTrainId(), cancelled, fromSeq, toSeq);
         if (checkAllPassengersAreRemoved(pnr)) {
             bookingRepository.updateStatus(booking.getBookingId(), BookingStatus.CANCELLED);
         }
         return true;
     }
 
-    private int cancelPassengers(List<Passenger> passengers, int trainId, int requiredMask) throws DataBaseException {
+    private int cancelPassengers(List<Passenger> passengers, int trainId, int fromSeq, int toSeq) {
         int cnfReleased = 0;
         List<SeatUpdateRequestDto> removeBooked = new ArrayList<>();
         List<PassengerSeatIdDto> dtos = new ArrayList<>();
@@ -72,8 +74,11 @@ public class CancellationService {
 
         for (Passenger p : passengers) {
             if (p.getStatus() == PassengerStatus.CNF) {
-                int newMask = seatRepository.getSeatById(p.getSeatId()).getMask() | requiredMask;
-                removeBooked.add(new SeatUpdateRequestDto(p.getSeatId(), newMask));
+                boolean[] newBooking = new boolean[3];
+                for (int i=fromSeq; i<toSeq; i++) {
+                    newBooking[i - 1] = false;
+                }
+                removeBooked.add(new SeatUpdateRequestDto(p.getSeatId(), newBooking));
                 cnfReleased++;
             }
             if (p.getStatus() == PassengerStatus.RAC) {
@@ -111,13 +116,7 @@ public class CancellationService {
         }
         return true;
     }
-    private int calculateMask(int fromSeq, int toSeq) {
-        long mask = 0L;
-        for (int i=fromSeq; i<toSeq; i++) {
-            mask |= (1L << (i - 1));
-        }
-        return (int) mask;
-    }
+
     private void promoteWlToRac(int trainId) throws DataBaseException {
         int availableRac = waitingListRepository.getAvailableRac(trainId);
 
@@ -144,7 +143,7 @@ public class CancellationService {
         }
     }
 
-    private void promoteRacToCnfSeats(int trainId, int cnfReleasedCnt) throws DataBaseException {
+    private void promoteRacToCnfSeats(int trainId, int cnfReleasedCnt, int fromSeq, int toSeq) throws DataBaseException {
         if (cnfReleasedCnt <= 0) {
             promoteWlToRac(trainId);
             return;
@@ -154,13 +153,13 @@ public class CancellationService {
         List<Integer> racRemove = new ArrayList<>();
         List<Integer> wlRemove = new ArrayList<>();
 
-        Map<Integer, Integer> pendingMasks = new LinkedHashMap<>();
+        Map<Integer, boolean[]> pendingMasks = new LinkedHashMap<>();
 
         int racCnt = waitingListRepository.getNumberOfRac(trainId);
         if (racCnt > 0) {
             for (Passenger p : waitingListRepository.getRacPassengers(trainId, racCnt)) {
-                Integer seatId = allocateSeat(trainId, getPassengerMask(p), pendingMasks);
-                if (seatId == null) continue;   // doesn't fit anywhere, try next
+                Integer seatId = allocateSeat(trainId, fromSeq, toSeq, pendingMasks);
+                if (seatId == null) continue;
                 racRemove.add(p.getPassengerId());
                 cnfDtos.add(new PassengerSeatIdDto(p.getPassengerId(), seatId));
             }
@@ -170,7 +169,7 @@ public class CancellationService {
         int wlCnt = waitingListRepository.getNumberOfWl(trainId); // add if you don't have it
         if (wlCnt > 0) {
             for (Passenger p : waitingListRepository.getWlPassengers(trainId, wlCnt)) {
-                Integer seatId = allocateSeat(trainId, getPassengerMask(p), pendingMasks);
+                Integer seatId = allocateSeat(trainId, fromSeq, toSeq, pendingMasks);
                 if (seatId == null) continue;
                 wlRemove.add(p.getPassengerId());
                 cnfDtos.add(new PassengerSeatIdDto(p.getPassengerId(), seatId));
@@ -194,23 +193,24 @@ public class CancellationService {
 
         promoteWlToRac(trainId);
     }
-    private Integer allocateSeat(int trainId, int requiredMask, Map<Integer, Integer> pendingMasks)
-            throws DataBaseException {
-        List<Seat> candidates = seatRepository.getAvailableSeats(trainId, requiredMask);
+    private Integer allocateSeat(int trainId, int fromSeq, int toSeq, Map<Integer, boolean[]> pendingMasks) throws DataBaseException {
+        List<Seat> candidates = seatRepository.getAvailableSeats(trainId, fromSeq, toSeq);
         for (Seat seat : candidates) {
-            int currentMask = pendingMasks.getOrDefault(seat.getSeatId(), seat.getMask());
-            if ((currentMask & requiredMask) == requiredMask) {   // still free after earlier allocations
-                pendingMasks.put(seat.getSeatId(), currentMask & ~requiredMask);
+            boolean[] currentMask = pendingMasks.getOrDefault(seat.getSeatId(), seat.getMask());
+            boolean canAllocate = true;
+            for (int i=fromSeq; i<toSeq; i++) {
+                if (currentMask[i - 1]) {
+                    canAllocate = false;
+                    break;
+                } else {
+                    currentMask[i - 1] = true;
+                }
+            }
+            if (canAllocate) {
+                pendingMasks.put(seat.getSeatId(), currentMask);
                 return seat.getSeatId();
             }
         }
         return null;
-    }
-
-    private int getPassengerMask(Passenger p) throws DataBaseException {
-        Booking b = bookingRepository.getBookingByPnr(p.getPnr());
-        Station from = stationRepository.getStationByCode(b.getFrom());
-        Station to = stationRepository.getStationByCode(b.getTo());
-        return calculateMask(from.getSequenceNo(), to.getSequenceNo());
     }
 }

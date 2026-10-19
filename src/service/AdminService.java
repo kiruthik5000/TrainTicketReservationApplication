@@ -16,7 +16,6 @@ public class AdminService {
     private final SeatRepository seatRepository;
     private final WaitingListRepository waitingListRepository;
 
-
     public AdminService(TrainRepository trainRepository, BookingRepository bookingRepository, PassengerRepository passengerRepository, SeatRepository seatRepository, WaitingListRepository waitingListRepository) {
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;

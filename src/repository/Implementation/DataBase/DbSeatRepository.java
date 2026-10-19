@@ -16,7 +16,7 @@ import java.util.List;
 
 public class DbSeatRepository implements SeatRepository {
     @Override
-    public List<Seat> getAvailableSeats(int trainId, int mask) throws DataBaseException {
+    public List<Seat> getAvailableSeats(int trainId, int from, int to) throws DataBaseException {
         String query = "SELECT * FROM seat WHERE trainId = ? AND status = 'AVAILABLE';";
 
         try (
@@ -32,8 +32,7 @@ public class DbSeatRepository implements SeatRepository {
                                 rs.getInt("seatId"),
                                 rs.getInt("seatNo"),
                                 rs.getInt("trainId"),
-                                SeatStatus.valueOf(rs.getString("status")),
-                                15
+                                SeatStatus.valueOf(rs.getString("status"))
                         )
                 );
             }
@@ -56,8 +55,7 @@ public class DbSeatRepository implements SeatRepository {
                         rs.getInt("seatId"),
                         rs.getInt("seatNo"),
                         rs.getInt("trainId"),
-                        SeatStatus.valueOf(rs.getString("status")),
-                        15
+                        SeatStatus.valueOf(rs.getString("status"))
                 );
             }
             return null;

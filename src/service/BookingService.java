@@ -37,8 +37,6 @@ public class BookingService {
     }
 
     public List<TrainResponseDto> getAllTrains(Station from, Station to) throws DataBaseException {
-//        if (from.getSequenceNo() >= to.getSequenceNo()) throw new IllegalArgumentException("No Trains Operating through this route");
-//        List<Train> trains = trainRepository.getAllTrains();
         List<Integer> trainIds = findTrains(from, to);
         if (trainIds.isEmpty()) throw new IllegalArgumentException("No Trains Operating through this route");
         List<TrainResponseDto> trainResponse = new ArrayList<>();
@@ -50,8 +48,7 @@ public class BookingService {
     }
 
     public SeatAvailabilityDto getAvailableSeats(int trainId, Station from, Station to) throws DataBaseException {
-        int mask = calculateMask(from.getSequenceNo(), to.getSequenceNo());
-        int cnfSeats = seatRepository.getAvailableSeats(trainId, mask).size();
+        int cnfSeats = seatRepository.getAvailableSeats(trainId, from.getSequenceNo(), to.getSequenceNo()).size();
         if (cnfSeats > 0) return new SeatAvailabilityDto("CNF", cnfSeats);
         int racNo = waitingListRepository.getAvailableRac(trainId);
         if (racNo > 0) return new SeatAvailabilityDto("RAC ", racNo);
@@ -64,9 +61,8 @@ public class BookingService {
 
         if (passengers == null || passengers.isEmpty()) throw new InvalidInputException("No Passengers Provided");
 
-        int requiredMask = calculateMask(from.getSequenceNo(), to.getSequenceNo());
 
-        List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId, requiredMask);
+        List<Seat> availableSeats = seatRepository.getAvailableSeats(trainId, from.getSequenceNo(), to.getSequenceNo());
         int totalPassengers = passengers.size();
         int cnfAvail = availableSeats.size();
         int cnfCnt = Math.min(cnfAvail, totalPassengers);
@@ -83,14 +79,17 @@ public class BookingService {
 
         List<Passenger> selectedPassengers = new ArrayList<>();
         List<SeatUpdateRequestDto> seatUpdateRequestDtos = new ArrayList<>();
-
+        boolean[] curBooking = new boolean[3];
+        for (int i=from.getSequenceNo(); i<to.getSequenceNo(); i++) {
+            curBooking[i - 1] = true;
+        }
         for (int i=0; i<cnfCnt; i++) {
              PassengerRequestDto curPassenger = passengers.get(i);
              Seat curSeat = availableSeats.get(i);
-             int newMask = curSeat.getMask() ^ requiredMask;
+
 //             seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
              Passenger cnfPassenger = new Passenger(0, curPassenger.getName(), curPassenger.getAge(), PassengerStatus.CNF, pnr, curSeat.getSeatId());
-             seatUpdateRequestDtos.add(new SeatUpdateRequestDto(curSeat.getSeatId(), newMask));
+             seatUpdateRequestDtos.add(new SeatUpdateRequestDto(curSeat.getSeatId(), curBooking));
 //             passengerRepository.addPassenger(cnfPassenger);
              selectedPassengers.add(cnfPassenger);
          }
@@ -193,14 +192,6 @@ public class BookingService {
 
     public Station getStation(String stationCode) {
         return stationRepository.getStationByCode(stationCode);
-    }
-
-    private int calculateMask(int fromSeq, int toSeq) {
-        long mask = 0L;
-        for (int i=fromSeq; i<toSeq; i++) {
-            mask |= (1L << (i - 1));
-        }
-        return (int) mask;
     }
 
     private List<Integer> findTrains(Station from, Station to) {

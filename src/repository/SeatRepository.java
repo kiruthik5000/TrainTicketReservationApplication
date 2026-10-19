@@ -8,7 +8,7 @@ import model.SeatStatus;
 import java.util.List;
 
 public interface SeatRepository {
-    List<Seat> getAvailableSeats(int trainId, int mask) throws DataBaseException;
+    List<Seat> getAvailableSeats(int trainId, int from, int to) throws DataBaseException;
     Seat getSeatById(int seatId) throws DataBaseException;
     void updateAllSeatStatus(List<SeatUpdateRequestDto> updateRequestDtos, SeatStatus status);
 }

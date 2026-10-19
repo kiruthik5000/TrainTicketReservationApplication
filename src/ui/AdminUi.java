@@ -29,23 +29,27 @@ public class AdminUi {
     }
     public void printPassengerValues(int trainID) throws DataBaseException {
         int curWindow = 0;
+        int curIdx = 0;
         while (true) {
             if (curWindow >= 0) {
                 List<PassengerResponseDto> passengerResponseDtos = adminService.showAllPassengersInTrain(trainID, curWindow);
                 if (passengerResponseDtos != null) {
-
+                    curIdx = 0;
                     System.out.println("Passengers: ");
                     for (PassengerResponseDto p : passengerResponseDtos) {
                         System.out.println(p);
                     }
                 } else {
                     System.out.println("End of passenger list");
-                    System.out.println("return to Main Menu");
-                    return;
+                    curIdx = 1;
                 }
             }
-            System.out.println("1. show next passengers");
-            System.out.println("2. previous list of passengers");
+            if (curIdx < 1) {
+                System.out.println("\n\n1. show next passengers");
+            }
+            if (curIdx > -1) {
+                System.out.println("2. previous list of passengers");
+            }
             System.out.println("3. return");
             try {
                 int choice = InputHandler.getNumericValue("choice", 3);
@@ -53,7 +57,10 @@ public class AdminUi {
                     curWindow++;
                 } else if (choice == 2) {
                     curWindow--;
-                    if (curWindow < 0) throw new InvalidInputException("Invalid Operation");
+                    if (curWindow < 0) {
+                        curIdx = -1;
+                        throw new InvalidInputException("Invalid Operation");
+                    }
                 } else {
                     return;
                 }
