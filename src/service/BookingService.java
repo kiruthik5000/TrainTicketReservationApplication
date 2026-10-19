@@ -63,8 +63,8 @@ public class BookingService {
         int cnfAvail = availableSeats.size();
         int cnfCnt = Math.min(cnfAvail, totalPassengers);
 
-        int racAvail = waitingListRepository.getAvailableRac(trainId);
-        int wlAvail = waitingListRepository.getAvailableWl(trainId);
+        int racAvail = waitingListRepository.getAvailableRac(trainId, sc);
+        int wlAvail = waitingListRepository.getAvailableWl(trainId, sc);
 
         int currentCanBook = cnfAvail + racAvail + wlAvail;
         if (passengers.size() > currentCanBook) throw new SeatNotFoundException("Only "+currentCanBook+" Seats left please Enter "+currentCanBook+" passengers.");
@@ -104,10 +104,10 @@ public class BookingService {
         List<Passenger> wlPassengers = selectedPassengers.stream().filter(k->k.getStatus() == PassengerStatus.WL).toList();
 
         if (!racPassengers.isEmpty()) {
-            waitingListRepository.addAllRac(trainId, racPassengers);
+            waitingListRepository.addAllRac(trainId, sc, racPassengers);
         }
         if (!wlPassengers.isEmpty()) {
-            waitingListRepository.addAllWl(trainId, wlPassengers);
+            waitingListRepository.addAllWl(trainId, sc, wlPassengers);
         }
 
          List<PassengerResponseDto> addedPassengers = gatherPassengerDetails(currentBooking, trainId);
@@ -164,9 +164,9 @@ public class BookingService {
             if (p.getStatus() == PassengerStatus.CNF){
                 seatNo = seatRepository.getSeatById(p.getSeatId()).getSeatNo();
             } else {
-                seatNo = waitingListRepository.getRacNo(trainId, p.getPassengerId());
+                seatNo = waitingListRepository.getRacNo(trainId, booking.getSeatType(),p.getPassengerId());
                 if (seatNo == -1) {
-                    seatNo = waitingListRepository.getWlNo(trainId, p.getPassengerId());
+                    seatNo = waitingListRepository.getWlNo(trainId, booking.getSeatType(), p.getPassengerId());
                 }
             }
             passengerResponseDtos.add(
@@ -208,8 +208,8 @@ public class BookingService {
     }
     public SeatAvailabilityDto getAvailableSeats(int trainId, SeatType sc, Station from, Station to) throws DataBaseException {
         int cnf = seatRepository.getAvailableSeats(trainId, sc, from.getSequenceNo(), to.getSequenceNo()).size();
-        int rac = waitingListRepository.getAvailableRac(trainId);
-        int wl  = waitingListRepository.getAvailableWl(trainId);
+        int rac = waitingListRepository.getAvailableRac(trainId, sc);
+        int wl  = waitingListRepository.getAvailableWl(trainId, sc);
 
         if (cnf > 0) return new SeatAvailabilityDto(sc, "CNF", cnf);
         if (rac > 0) return new SeatAvailabilityDto(sc,"RAC", rac);

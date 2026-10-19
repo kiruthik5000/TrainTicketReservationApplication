@@ -44,9 +44,9 @@ public class AdminService {
             if (p.getStatus().equals(PassengerStatus.CNF)) {
                 seatNo = seatRepository.getSeatById(p.getSeatId()).getSeatNo();
             } else if (p.getStatus().equals(PassengerStatus.RAC)) {
-                seatNo = waitingListRepository.getRacNo(trainId, p.getPassengerId());
+                seatNo = waitingListRepository.getRacNo(trainId,seatType, p.getPassengerId());
             } else {
-                seatNo = waitingListRepository.getWlNo(trainId, p.getPassengerId());
+                seatNo = waitingListRepository.getWlNo(trainId,seatType, p.getPassengerId());
             }
             passengerResponse.add(
                     new PassengerResponseDto(

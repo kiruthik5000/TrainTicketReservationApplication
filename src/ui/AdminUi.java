@@ -33,7 +33,7 @@ public class AdminUi {
                 }
                 System.out.println((types.size() + 1)+". Return to Main Menu");
                 System.out.println();
-                int seatType = InputHandler.getNumericValue("Seat Type", types.size());
+                int seatType = InputHandler.getNumericValue("Seat Type", types.size() + 1);
                 if (seatType == types.size() + 1) return;
                 printPassengerValues(types.get(seatType - 1), trainList.get(choice - 1).getTrainId());
             } catch (Exception e) {
