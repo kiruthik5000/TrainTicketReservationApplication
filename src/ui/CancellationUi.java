@@ -11,9 +11,7 @@ import service.CancellationService;
 import utils.InputHandler;
 import utils.SessionStorage;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CancellationUi {
     private final CancellationService cancellationService;
@@ -26,14 +24,14 @@ public class CancellationUi {
 
     public void cancelTickets() throws DataBaseException {
         SessionStorage.userIsLoggedIn();
-        List<Booking> bookingList = bookingService.getActiveBookings();
-        if (bookingList == null || bookingList.isEmpty()) throw new ItemNotFoundException("No Active Bookings Found");
-
+        List<Booking> bookingList = new ArrayList<>(bookingService.getActiveBookings());
+        if (bookingList.isEmpty()) throw new ItemNotFoundException("No Active Bookings Found");
+        bookingList.sort(Comparator.comparingInt(Booking::getBookingId).reversed());
         for (int i = 0; i < bookingList.size(); i++) {
             Booking curBooking = bookingList.get(i);
-            System.out.println((i + 1) + ". pnr: " + curBooking.getPnr() + "\t" + curBooking.getFrom() + " - " + curBooking.getTo() + "\t" + curBooking.getStatus());
+            System.out.println((i + 1) + ". pnr: " + curBooking.getPnr() + "\t" + curBooking.getFrom() + " - " + curBooking.getTo() +"\t"+curBooking.getSeatType()+ "\t" + curBooking.getStatus());
         }
-
+        System.out.println();
         int choice = InputHandler.getNumericValue("Choice of Booking", bookingList.size());
         Booking selectedBooking = bookingList.get(choice - 1);
         while (true) {
@@ -90,7 +88,6 @@ public class CancellationUi {
                 System.out.println("Wrong Input Try Again!");
             }
         }
-
     }
 
     private Set<Integer> gatherPassengersNeedToRemove(Booking curBooking, int trainId) throws DataBaseException {
@@ -110,20 +107,28 @@ public class CancellationUi {
     }
 
     private Set<Integer> getAllPassengerIndex(List<PassengerResponseDto> dtos, int limit) {
-        String input = InputHandler.getStringValue("Index of Passengers separated by comma ','");
-        Set<Integer> selected = new HashSet<>();
-        String[] indexes = input.split(",");
-
-        for (String v : indexes) {
+        while (true) {
             try {
-                int index = Integer.parseInt(v.trim());
-                    if (index < 1 || index > limit) throw new InvalidInputException("Invalid Passenger Index");
-                PassengerResponseDto selectedPassenger = dtos.get(index - 1);
-                if (selectedPassenger != null) {
-                    selected.add(selectedPassenger.getpId());
+                String input = InputHandler.getStringValue("Index of Passengers separated by comma ','");
+                Set<Integer> selected = new HashSet<>();
+                String[] indexes = input.split(",");
+
+                for (String v : indexes) {
+                    try {
+                        int index = Integer.parseInt(v.trim());
+                        if (index < 1 || index > limit) throw new InvalidInputException("Invalid Passenger Index");
+                        PassengerResponseDto selectedPassenger = dtos.get(index - 1);
+                        if (selectedPassenger != null) {
+                            selected.add(selectedPassenger.getpId());
+                        }
+                    } catch (NumberFormatException e) {
+                        throw new InvalidInputException(e.getMessage());
+                    }
                 }
-            } catch (NumberFormatException e) { System.out.println( "Invalid input: " + v ); }
+                return selected;
+            } catch (Exception e) {
+                System.out.println("Error Occurred " + e.getMessage());
+            }
         }
-        return selected;
     }
 }

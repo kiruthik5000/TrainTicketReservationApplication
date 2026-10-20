@@ -27,6 +27,9 @@ public class BookingUi {
 
     public void bookTickets() throws Exception {
         if (!SessionStorage.userIsLoggedIn()) return;
+        System.out.println(
+
+        );
         Station fromStation = getStation("Departure Station code");
         Station toStation = getStation("Arrival Station code");
 
@@ -41,19 +44,24 @@ public class BookingUi {
         System.out.println((trainList.size() + 1)+". Back to Main Menu");
         System.out.println();
         int choice = InputHandler.getNumericValue("Train Index", trainList.size() + 1);
+
         if (choice - 1 == trainList.size()) {
             System.out.println("Returning to Main Menu");
             return;
         }
         TrainResponseDto selectedTrain = trainList.get(choice - 1);
+        System.out.println();
         for (int i=0; i<selectedTrain.getSeatAvailabilityDto().size(); i++) {
             System.out.println((i + 1)+". "+selectedTrain.getSeatAvailabilityDto().get(i));
-            System.out.println();
         }
-        int seatChoice = InputHandler.getNumericValue("Seat Choice", selectedTrain.getSeatAvailabilityDto().size());
+        System.out.println((selectedTrain.getSeatAvailabilityDto().size() + 1)+". Back To Main Menu");
+        int seatChoice = InputHandler.getNumericValue("Seat Choice", selectedTrain.getSeatAvailabilityDto().size() + 1);
+
+        if (seatChoice == selectedTrain.getSeatAvailabilityDto().size() + 1) return;
         Train curTrain = selectedTrain.getTrain();
         SeatType seatType = selectedTrain.getSeatAvailabilityDto().get(seatChoice - 1).getSeatType();
         if (selectedTrain.getSeatAvailabilityDto().get(seatChoice - 1).getAvailabilityStatus().equals("REGRET")) throw new SeatNotFoundException("No seats found for this train");
+
         while (true) {
             try {
                 System.out.println("------------------------");
@@ -65,15 +73,18 @@ public class BookingUi {
 
                 if (passengersList == null || passengersList.isEmpty()) return;
 
-                System.out.println("Selected " + passengersList.size() + " Passengers");
+                System.out.println("\nSelected " + passengersList.size() + " Passengers");
                 for (PassengerRequestDto p : passengersList) {
                     System.out.println(p);
                 }
                 System.out.println();
                 while (true) {
+                    double price = bookingService.calculatePrice(seatType, fromStation, toStation, passengersList.size());
+                    System.out.println("Total Fare: "+price);
                     String cnf = InputHandler.getStringValue("Confirm booking [y / n]");
                     if (cnf.equals("y")) {
                         BookingResponseDto responseDto = bookingService.bookTickets(curTrain.getTrainId(), seatType, fromStation, toStation, passengersList);
+                        System.out.println();
                         System.out.println(responseDto);
                         break;
                     } else if (cnf.equals("n")) {
@@ -112,9 +123,10 @@ public class BookingUi {
         while (passengerList.size() < 6) {
             System.out.println("1. Add new passenger");
             System.out.println("2. Submit");
-            System.out.println("3. Back to Main Menu");
+            System.out.println("3. Back to Main Menu\n");
 
             int choice = InputHandler.getNumericValue("choice", 3);
+            System.out.println();
             if (choice == 1) {
                 String name = InputHandler.getStringValue("name");
                 int age = InputHandler.getNumericValue("age", 100);

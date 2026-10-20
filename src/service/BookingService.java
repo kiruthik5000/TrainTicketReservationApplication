@@ -9,6 +9,7 @@ import model.*;
 import repository.*;
 import utils.SessionStorage;
 
+import java.time.Duration;
 import java.util.*;
 
 public class BookingService {
@@ -75,14 +76,14 @@ public class BookingService {
 
         List<Passenger> selectedPassengers = new ArrayList<>();
         List<SeatUpdateRequestDto> seatUpdateRequestDtos = new ArrayList<>();
-        boolean[] curBooking = new boolean[3];
-        for (int i=from.getSequenceNo(); i<to.getSequenceNo(); i++) {
-            curBooking[i - 1] = true;
-        }
+
         for (int i=0; i<cnfCnt; i++) {
              PassengerRequestDto curPassenger = passengers.get(i);
              Seat curSeat = availableSeats.get(i);
-
+                boolean[] curBooking = curSeat.getMask().clone();
+                for (int j= from.getSequenceNo(); j<to.getSequenceNo(); j++) {
+                    curBooking[j - 1] = true;
+                }
 //             seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
              Passenger cnfPassenger = new Passenger(0, curPassenger.getName(), curPassenger.getAge(), PassengerStatus.CNF, pnr, curSeat.getSeatId());
              seatUpdateRequestDtos.add(new SeatUpdateRequestDto(curSeat.getSeatId(), curBooking.clone()));
@@ -216,5 +217,9 @@ public class BookingService {
         if (wl  > 0) return new SeatAvailabilityDto(sc,"WL", wl);
         if (rac == -1 && wl == -1) return null;        // train doesn't offer this class
         return new SeatAvailabilityDto(sc,"REGRET", -1);
+    }
+    public double calculatePrice(SeatType seatType, Station from, Station to, int noOfPassengers) {
+        Duration d = Duration.between(from.getArrivalTime(), to.getArrivalTime());
+        return d.toMinutes() * seatType.getFareMultiplier() * noOfPassengers;
     }
 }
