@@ -51,6 +51,10 @@ public class BookingUi {
         }
         TrainResponseDto selectedTrain = trainList.get(choice - 1);
         System.out.println();
+        if (selectedTrain.getSeatAvailabilityDto() == null || selectedTrain.getSeatAvailabilityDto().isEmpty() || selectedTrain.getSeatAvailabilityDto().get(0) == null) {
+            System.out.println("No Seats Found in this train.");
+            return;
+        }
         for (int i=0; i<selectedTrain.getSeatAvailabilityDto().size(); i++) {
             System.out.println((i + 1)+". "+selectedTrain.getSeatAvailabilityDto().get(i));
         }

@@ -44,12 +44,16 @@ public class TrainResponseDto {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (SeatAvailabilityDto s : availabilityDtos) {
-            if (s == null) {
-                sb.append("No Seats left.\n");
-                break;
+        if (availabilityDtos == null || availabilityDtos.isEmpty()) {
+            sb.append("No Seats left.\n");
+        } else {
+            for (SeatAvailabilityDto s : availabilityDtos) {
+                if (s == null) {
+                    sb.append("No Seats left.\n");
+                    break;
+                }
+                sb.append(s).append("\n");
             }
-            sb.append(s).append("\n");
         }
         return train+"\n"+
                 from.getStationCode()+" - "+from.getArrivalTime().toString()

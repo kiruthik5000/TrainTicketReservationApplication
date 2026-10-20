@@ -27,6 +27,7 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
     private String key(int trainId, SeatType st) {
         return trainId+":"+st.name();
     }
+
     @Override
     public void addAllRac(int trainId, SeatType seatType, List<Passenger> passengers) {
         String key = key(trainId, seatType);
@@ -101,7 +102,6 @@ public class InMemoryWaitingListRepository implements WaitingListRepository {
 
     @Override
     public int getRacNo(int trainId, SeatType seatType, int pId) {
-
         return getSequenceNo(trainId, pId, racList, seatType);
     }
 

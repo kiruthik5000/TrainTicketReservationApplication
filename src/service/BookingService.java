@@ -41,15 +41,18 @@ public class BookingService {
         List<TrainResponseDto> trainResponse = new ArrayList<>();
         for (int id : trainIds) {
             Train curTrain = trainRepository.getTrainById(id);
+
             trainResponse.add(new TrainResponseDto(curTrain, getAvailableSeats(id, from, to), from, to));
         }
         return trainResponse;
     }
 
-    public List<SeatAvailabilityDto> getAvailableSeats(int trainId, Station from, Station to) throws DataBaseException {
+    private List<SeatAvailabilityDto> getAvailableSeats(int trainId, Station from, Station to) throws DataBaseException {
         List<SeatAvailabilityDto> availabilityDtos = new ArrayList<>();
-        for (SeatType e : new SeatType[]{SeatType.SLEEPER, SeatType.AC}) {
-            availabilityDtos.add(getAvailableSeats(trainId, e, from, to));
+        for (SeatType e : new SeatType[]{SeatType.SLEEPER, SeatType.AC, SeatType.S2}) {
+            SeatAvailabilityDto dto = getAvailableSeatCount(trainId, e, from, to);
+            if (dto == null) continue;
+            availabilityDtos.add(dto);
         }
         return availabilityDtos;
     }
@@ -80,13 +83,13 @@ public class BookingService {
         for (int i=0; i<cnfCnt; i++) {
              PassengerRequestDto curPassenger = passengers.get(i);
              Seat curSeat = availableSeats.get(i);
-                boolean[] curBooking = curSeat.getMask().clone();
+                boolean[] curBookingMask = curSeat.getMask().clone();
                 for (int j= from.getSequenceNo(); j<to.getSequenceNo(); j++) {
-                    curBooking[j - 1] = true;
+                    curBookingMask[j - 1] = true;
                 }
 //             seatRepository.updateStatus(curSeat.getSeatId(), SeatStatus.BOOKED);
              Passenger cnfPassenger = new Passenger(0, curPassenger.getName(), curPassenger.getAge(), PassengerStatus.CNF, pnr, curSeat.getSeatId());
-             seatUpdateRequestDtos.add(new SeatUpdateRequestDto(curSeat.getSeatId(), curBooking.clone()));
+             seatUpdateRequestDtos.add(new SeatUpdateRequestDto(curSeat.getSeatId(), curBookingMask.clone()));
 //             passengerRepository.addPassenger(cnfPassenger);
              selectedPassengers.add(cnfPassenger);
          }
@@ -207,16 +210,16 @@ public class BookingService {
         }
         return result;
     }
-    public SeatAvailabilityDto getAvailableSeats(int trainId, SeatType sc, Station from, Station to) throws DataBaseException {
+    private SeatAvailabilityDto getAvailableSeatCount(int trainId, SeatType sc, Station from, Station to) throws DataBaseException {
         int cnf = seatRepository.getAvailableSeats(trainId, sc, from.getSequenceNo(), to.getSequenceNo()).size();
         int rac = waitingListRepository.getAvailableRac(trainId, sc);
         int wl  = waitingListRepository.getAvailableWl(trainId, sc);
-
-        if (cnf > 0) return new SeatAvailabilityDto(sc, "CNF", cnf);
-        if (rac > 0) return new SeatAvailabilityDto(sc,"RAC", rac);
-        if (wl  > 0) return new SeatAvailabilityDto(sc,"WL", wl);
+        double curPrice = calculatePrice(sc, from, to, 1);
+        if (cnf > 0) return new SeatAvailabilityDto(sc, "CNF", cnf, curPrice);
+        if (rac > 0) return new SeatAvailabilityDto(sc,"RAC", rac, curPrice);
+        if (wl  > 0) return new SeatAvailabilityDto(sc,"WL", wl, curPrice);
         if (rac == -1 && wl == -1) return null;        // train doesn't offer this class
-        return new SeatAvailabilityDto(sc,"REGRET", -1);
+        return new SeatAvailabilityDto(sc,"REGRET", -1, -1);
     }
     public double calculatePrice(SeatType seatType, Station from, Station to, int noOfPassengers) {
         Duration d = Duration.between(from.getArrivalTime(), to.getArrivalTime());

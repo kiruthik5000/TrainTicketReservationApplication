@@ -28,7 +28,10 @@ public class InMemorySeatRepository implements SeatRepository {
 
         seatMap.get(1).setMask(new boolean[]{true, false, false});
 
-        trainSeatMap.put(1, new ArrayList<>(List.of(1, 2, 3, 4, 5, 6)));
+        for (Map.Entry<Integer, Seat> entry : seatMap.entrySet()) {
+            trainSeatMap.computeIfAbsent(entry.getValue().getTrainId(), k->new ArrayList<>()).add(entry.getKey());
+        }
+//        seatMap.get(6).setMask(new boolean[]{false, false, false, false});
     }
 
     @Override
