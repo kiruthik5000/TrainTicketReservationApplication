@@ -95,7 +95,7 @@ public class MainMenuUi {
             cancellationUi.cancelTickets();
         } catch (Exception e) {
             System.out.println(e.getClass().getSimpleName()+" "+e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 

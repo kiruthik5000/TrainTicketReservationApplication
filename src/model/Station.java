@@ -17,6 +17,7 @@ public class Station {
         return stationCode;
     }
     public int getSequenceNo() {return sequenceNo;}
+    public int getDistance() {return distance;}
     public int getStationId() {return stationId;}
     public Station(int stationId, String stationName, String stationCode, int sequenceNo, int trainId, LocalTime arrivalTime, int distance) {
         this.stationId = stationId;

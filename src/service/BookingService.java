@@ -222,7 +222,7 @@ public class BookingService {
         return new SeatAvailabilityDto(sc,"REGRET", -1, -1);
     }
     public double calculatePrice(SeatType seatType, Station from, Station to, int noOfPassengers) {
-        Duration d = Duration.between(from.getArrivalTime(), to.getArrivalTime());
-        return d.toMinutes() * seatType.getFareMultiplier() * noOfPassengers;
+        int dist = to.getDistance() - from.getDistance();
+        return dist * seatType.getFareMultiplier() * noOfPassengers;
     }
 }

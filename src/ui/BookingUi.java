@@ -53,10 +53,8 @@ public class BookingUi {
                     return;
                 }
                 System.out.println("\n"+dto+"\n");
-                return;
-            } else {
-                return;
             }
+            return;
         }
 
         for (int i=0; i<trainList.size(); i++) {
