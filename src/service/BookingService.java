@@ -37,7 +37,7 @@ public class BookingService {
 
     public List<TrainResponseDto> getAllTrains(Station from, Station to) throws DataBaseException {
         List<Integer> trainIds = findTrains(from, to);
-        if (trainIds.isEmpty()) throw new ItemNotFoundException("No Trains Operating through this route");
+        if (trainIds.isEmpty()) return null;
         List<TrainResponseDto> trainResponse = new ArrayList<>();
         for (int id : trainIds) {
             Train curTrain = trainRepository.getTrainById(id);

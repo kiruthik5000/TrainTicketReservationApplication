@@ -24,6 +24,7 @@ public class PassengerResponseDto {
     public int getpId() {
         return pId;
     }
+    public PassengerStatus getStatus() {return status;}
     @Override
     public String toString() {
 

@@ -22,7 +22,7 @@ public class SeatAvailabilityDto {
 
     @Override
     public String toString() {
-        if (availabilityStatus.equals("REGRET")) return "Regret No more seats left";
+        if (availabilityStatus.equals("REGRET")) return seatType+" : Regret No more seats left";
         return seatType+" : "+ " Available "+availabilityStatus+" : "+availability+"\nPrice: "+price;
     }
 }

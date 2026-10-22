@@ -6,6 +6,7 @@ import exception.DataBaseException;
 import exception.InvalidInputException;
 import exception.ItemNotFoundException;
 import model.Booking;
+import model.PassengerStatus;
 import service.BookingService;
 import service.CancellationService;
 import utils.InputHandler;
@@ -32,7 +33,8 @@ public class CancellationUi {
             System.out.println((i + 1) + ". pnr: " + curBooking.getPnr() + "\t" + curBooking.getFrom() + " - " + curBooking.getTo() +"\t"+curBooking.getSeatType()+ "\t" + curBooking.getStatus());
         }
         System.out.println();
-        int choice = InputHandler.getNumericValue("Choice of Booking", bookingList.size());
+        int choice = InputHandler.getNumericValue("Choice of Booking or 0 for Back", bookingList.size());
+        if (choice == 0) return;
         Booking selectedBooking = bookingList.get(choice - 1);
         while (true) {
             BookingResponseDto dto = bookingService.getBookingDetails(selectedBooking.getPnr());
@@ -91,7 +93,11 @@ public class CancellationUi {
     }
 
     private Set<Integer> gatherPassengersNeedToRemove(Booking curBooking, int trainId) throws DataBaseException {
-        List<PassengerResponseDto> passengers = bookingService.gatherPassengerDetails(curBooking, trainId);
+        List<PassengerResponseDto> passengers = new ArrayList<>(bookingService.gatherPassengerDetails(curBooking, trainId))
+                .stream()
+                .filter(k->!k.getStatus().equals(PassengerStatus.CANCELLED))
+                .toList();
+
         System.out.println("\nPassengers:");
         for (int i=0; i<passengers.size(); i++) {
             System.out.println((i + 1)+". "+passengers.get(i));

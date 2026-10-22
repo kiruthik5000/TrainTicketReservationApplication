@@ -1,6 +1,7 @@
 package ui;
 
 import dto.BookingResponseDto;
+import dto.MultiHopTrainDto;
 import dto.PassengerRequestDto;
 import dto.TrainResponseDto;
 import exception.DataBaseException;
@@ -12,6 +13,7 @@ import model.SeatType;
 import model.Station;
 import model.Train;
 import service.BookingService;
+import service.TrainService;
 import utils.InputHandler;
 import utils.SessionStorage;
 
@@ -20,22 +22,42 @@ import java.util.List;
 
 public class BookingUi {
     private final BookingService bookingService;
+    private final TrainService trainService;
 
-    public BookingUi(BookingService bookingService) {
+    public BookingUi(BookingService bookingService, TrainService trainService) {
         this.bookingService = bookingService;
+        this.trainService = trainService;
     }
 
     public void bookTickets() throws Exception {
         if (!SessionStorage.userIsLoggedIn()) return;
-        System.out.println(
-
-        );
+        System.out.println();
         Station fromStation = getStation("Departure Station code");
+        if (fromStation == null) return;
         Station toStation = getStation("Arrival Station code");
+        if (toStation == null) return;
 
         List<TrainResponseDto> trainList = bookingService.getAllTrains(fromStation, toStation);
 
-        if (trainList == null || trainList.isEmpty()) throw new ItemNotFoundException("No trains found for this schedule");
+        if (trainList == null || trainList.isEmpty()) {
+            System.out.println("No trains found for this Route");
+            System.out.println("1. Advanced Search");
+            System.out.println("2. return to Main Menu");
+            System.out.println();
+
+            int option = InputHandler.getNumericValue("Option", 2);
+            if (option == 1) {
+                MultiHopTrainDto dto = trainService.searchTrains(fromStation.getStationCode(), toStation.getStationCode());
+                if (dto == null) {
+                    System.out.println("Cannot reach from source to destination");
+                    return;
+                }
+                System.out.println("\n"+dto+"\n");
+                return;
+            } else {
+                return;
+            }
+        }
 
         for (int i=0; i<trainList.size(); i++) {
             System.out.println((i + 1)+". "+trainList.get(i));
@@ -164,7 +186,8 @@ public class BookingUi {
     private Station getStation(String label) {
         while (true) {
             try {
-                String stationCode = InputHandler.getStringValue(label);
+                String stationCode = InputHandler.getStringValue(label+" or 0 for Back");
+                if (stationCode.equals("0")) return null;
                 Station s = bookingService.getStation(stationCode);
                 if (s == null) throw new InvalidInputException("Invalid "+label);
                 return s;

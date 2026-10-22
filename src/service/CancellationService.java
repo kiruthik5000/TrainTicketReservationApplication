@@ -168,8 +168,7 @@ public class CancellationService {
             }
         }
 
-        // 2. Then ALL WL passengers into whatever gaps remain
-        int wlCnt = waitingListRepository.getNumberOfWl(trainId, booking.getSeatType()); // add if you don't have it
+        int wlCnt = waitingListRepository.getNumberOfWl(trainId, booking.getSeatType());
         if (wlCnt > 0) {
             for (Passenger p : waitingListRepository.getWlPassengers(trainId, booking.getSeatType(), wlCnt)) {
                 Booking curPassengerBooking = bookingRepository.getBookingByPnr(p.getPnr());
@@ -194,7 +193,6 @@ public class CancellationService {
         if (!cnfDtos.isEmpty()) {
             passengerRepository.updateAllPassengerStatusAndSeatNo(cnfDtos, PassengerStatus.CNF);
         }
-
         promoteWlToRac(trainId, booking.getSeatType());
     }
     private Integer allocateSeat(Booking booking, Map<Integer, boolean[]> pendingMasks) throws DataBaseException {

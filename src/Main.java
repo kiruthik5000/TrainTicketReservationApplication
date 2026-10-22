@@ -1,9 +1,6 @@
 import repository.*;
 import repository.Implementation.InMemory.*;
-import service.AdminService;
-import service.BookingService;
-import service.CancellationService;
-import service.UserService;
+import service.*;
 import ui.*;
 
 public class Main {
@@ -21,9 +18,10 @@ public class Main {
         BookingService bookingService = new BookingService(trainRepository, seatRepository, bookingRepository, passengerRepository, waitingListRepository, stationRepository);
         CancellationService cancellationService = new CancellationService(bookingRepository, seatRepository, waitingListRepository, passengerRepository, stationRepository);
         AdminService adminService = new AdminService(trainRepository, bookingRepository,passengerRepository,seatRepository, waitingListRepository);
+        TrainService trainService = new TrainService(trainRepository, stationRepository);
 
         UserUi userUi = new UserUi(userService);
-        BookingUi bookingUi = new BookingUi(bookingService);
+        BookingUi bookingUi = new BookingUi(bookingService, trainService);
         CancellationUi cancellationUi = new CancellationUi(cancellationService, bookingService);
         AdminUi adminUI = new AdminUi(adminService);
 
