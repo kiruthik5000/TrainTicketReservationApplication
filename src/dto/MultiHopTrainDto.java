@@ -4,6 +4,7 @@ package dto;
 import model.Train;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MultiHopTrainDto {
@@ -15,6 +16,9 @@ public class MultiHopTrainDto {
 
     public void addTrainDto(SimpleTrainDto dto) {
         trainLists.add(dto);
+    }
+    public void reverseTrains() {
+        Collections.reverse(trainLists);
     }
 
     @Override
