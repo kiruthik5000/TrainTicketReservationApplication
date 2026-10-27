@@ -40,7 +40,7 @@ public class BookingUi {
         List<TrainResponseDto> trainList = bookingService.getAllTrains(fromStation, toStation);
 
         if (trainList == null || trainList.isEmpty()) {
-            System.out.println("No trains found for this Route");
+            System.out.println("No Direct trains found for this Route");
             System.out.println("1. Advanced Search");
             System.out.println("2. return to Main Menu");
             System.out.println();
@@ -48,7 +48,7 @@ public class BookingUi {
             int option = InputHandler.getNumericValue("Option", 2);
             if (option == 1) {
                 MultiHopTrainDto dto = trainService.searchTrains(fromStation.getStationCode(), toStation.getStationCode());
-                if (dto == null) {
+                if (dto == null || dto.toString() == null) {
                     System.out.println("Cannot reach from source to destination");
                     return;
                 }

@@ -91,7 +91,7 @@ public class BookingService {
              seatUpdateRequestDtos.add(new SeatUpdateRequestDto(curSeat.getSeatId(), curBookingMask.clone()));
 //             passengerRepository.addPassenger(cnfPassenger);
              selectedPassengers.add(cnfPassenger);
-         }
+        }
         if (!seatUpdateRequestDtos.isEmpty()) {
             seatRepository.updateAllSeatStatus(seatUpdateRequestDtos, SeatStatus.BOOKED);
         }
@@ -201,10 +201,14 @@ public class BookingService {
         Map<Integer, Integer> toSeq = stationRepository.getTrainSequences(to);
         if (fromSeq == null || toSeq == null) return result;
 
-        for (Map.Entry<Integer, Integer> e : fromSeq.entrySet()) {
-            Integer toNo = toSeq.get(e.getKey());
-            if (toNo != null && e.getValue() < toNo) {
-                result.add(e.getKey());
+        Map<Integer, Integer> curMap = fromSeq.size() < toSeq.size() ? fromSeq : toSeq;
+
+        for (Map.Entry<Integer, Integer> e : curMap.entrySet()) {
+            Integer trainId = e.getKey();
+            Integer fromNo = fromSeq.get(trainId);
+            Integer toNo = toSeq.get(trainId);
+            if (fromNo != null && toNo != null && fromNo < toNo) {
+                result.add(trainId);
             }
         }
         return result;

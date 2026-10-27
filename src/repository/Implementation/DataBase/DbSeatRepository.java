@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
 public class DbSeatRepository implements SeatRepository {
@@ -34,7 +35,8 @@ public class DbSeatRepository implements SeatRepository {
                                 rs.getInt("seatNo"),
                                 rs.getInt("trainId"),
                                 SeatStatus.valueOf(rs.getString("status")),
-                                SeatType.SLEEPER
+                                SeatType.SLEEPER,
+                                new BitSet(3)
                         )
                 );
             }
@@ -58,7 +60,8 @@ public class DbSeatRepository implements SeatRepository {
                         rs.getInt("seatNo"),
                         rs.getInt("trainId"),
                         SeatStatus.valueOf(rs.getString("status")),
-                        SeatType.SLEEPER
+                        SeatType.SLEEPER,
+                        new BitSet(3)
                 );
             }
             return null;

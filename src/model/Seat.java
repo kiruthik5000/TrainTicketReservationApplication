@@ -1,22 +1,28 @@
 package model;
 
+import java.util.BitSet;
+
 public class Seat {
     private int seatId;
     private int seatNo;
     private SeatStatus status;
     private boolean[] booked;
+    private BitSet mask;
     private int trainId;
     private SeatType seatType;
 
-    public Seat(int seatId, int seatNo, int trainId, SeatStatus status, SeatType seatType) {
+    public Seat(int seatId, int seatNo, int trainId, SeatStatus status, SeatType seatType, BitSet mask) {
         this.seatId = seatId;
         this.status = status;
         this.seatNo = seatNo;
         this.trainId = trainId;
         this.booked = new boolean[3];
         this.seatType = seatType;
+        this.mask = mask;
     }
 
+    public BitSet getBitMask() {return this.mask;}
+    public void setBitMask(BitSet set) {this.mask = set;}
     public boolean[] getMask() {return booked;}
     public SeatStatus getStatus() {
         return status;
